@@ -1,0 +1,6 @@
+{
+  "name": "CohortIQ",
+  "description": "Adaptive AI Technical Interviewer & Candidate Intelligence Engine",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
