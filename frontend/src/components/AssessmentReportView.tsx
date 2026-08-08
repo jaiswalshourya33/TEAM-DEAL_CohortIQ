@@ -19,6 +19,9 @@ export const AssessmentReportView: React.FC<AssessmentReportViewProps> = ({
   onReturnToProfile
 }) => {
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copiedLinkToast, setCopiedLinkToast] = useState(false);
+  const [copiedSummaryToast, setCopiedSummaryToast] = useState(false);
 
   // Retrieve candidate-specific assessment data (live interview feedback takes priority if present)
   const activeReport = getCandidateReport(candidate, feedback, transcript);
@@ -34,8 +37,49 @@ export const AssessmentReportView: React.FC<AssessmentReportViewProps> = ({
     communication: 75
   };
 
+  const shareableUrl = typeof window !== 'undefined' ? `${window.location.origin}/report/${candidate.member.id}` : `https://cohortiq.dev/report/${candidate.member.id}`;
+
+  const handleOpenShareModal = () => {
+    setIsShareModalOpen(true);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        setCopiedLinkToast(true);
+        setTimeout(() => setCopiedLinkToast(false), 2500);
+      }).catch(() => {});
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        setCopiedLinkToast(true);
+        setTimeout(() => setCopiedLinkToast(false), 2500);
+      });
+    }
+  };
+
+  const handleCopySummary = () => {
+    const summaryText = `CohortIQ Assessment Report for ${candidate.member.name} (${candidate.member.jobRole})\nOverall Score: ${scores.overall}/100 - ${scores.overall >= 80 ? 'Strong Competency (Recommended for Hire)' : 'Moderate Competency'}\n\nSummary:\n${report.summary}\n\nKey Strengths:\n${report.strengths.map(s => `- ${s}`).join('\n')}\n\nReport Link: ${shareableUrl}`;
+    
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(summaryText).then(() => {
+        setCopiedSummaryToast(true);
+        setTimeout(() => setCopiedSummaryToast(false), 2500);
+      });
+    }
+  };
+
+  const handlePrintReport = () => {
+    setIsShareModalOpen(false);
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.print();
+      }
+    }, 150);
+  };
+
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
+    <div className="space-y-8 max-w-7xl mx-auto pb-16 print-report-area">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#383430] pb-4">
         <div>
@@ -52,14 +96,17 @@ export const AssessmentReportView: React.FC<AssessmentReportViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="bg-[#221f1c] hover:bg-[#383430] text-[#e9e1dc] text-xs font-semibold px-4 py-2 rounded-xl border border-[#534439] flex items-center gap-2 transition-colors">
+          <button
+            onClick={handleOpenShareModal}
+            className="bg-[#221f1c] hover:bg-[#383430] text-[#e9e1dc] text-xs font-semibold px-4 py-2 rounded-xl border border-[#534439] flex items-center gap-2 transition-colors cursor-pointer"
+          >
             <span className="material-symbols-outlined text-sm">share</span>
             <span>Share Report</span>
           </button>
 
           <button
             onClick={onRestartSession}
-            className="bg-[#f4a261] hover:bg-[#e76f51] text-[#161310] text-xs font-bold px-4 py-2 rounded-xl shadow transition-colors flex items-center gap-1"
+            className="bg-[#f4a261] hover:bg-[#e76f51] text-[#161310] text-xs font-bold px-4 py-2 rounded-xl shadow transition-colors flex items-center gap-1 cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">refresh</span>
             <span>Practice Again</span>
@@ -250,19 +297,136 @@ export const AssessmentReportView: React.FC<AssessmentReportViewProps> = ({
       <div className="flex justify-between items-center pt-4">
         <button
           onClick={onReturnToProfile}
-          className="bg-[#221f1c] hover:bg-[#383430] text-[#e9e1dc] text-xs font-bold px-6 py-3 rounded-xl border border-[#534439] transition-colors"
+          className="bg-[#221f1c] hover:bg-[#383430] text-[#e9e1dc] text-xs font-bold px-6 py-3 rounded-xl border border-[#534439] transition-colors cursor-pointer"
         >
           Return to Candidate Profile
         </button>
 
         <button
           onClick={onRestartSession}
-          className="bg-[#f4a261] hover:bg-[#e76f51] text-[#161310] text-xs font-extrabold px-8 py-3 rounded-xl shadow transition-colors flex items-center gap-2"
+          className="bg-[#f4a261] hover:bg-[#e76f51] text-[#161310] text-xs font-extrabold px-8 py-3 rounded-xl shadow transition-colors flex items-center gap-2 cursor-pointer"
         >
           <span>Practice Next Interview</span>
           <span className="material-symbols-outlined text-sm">arrow_forward</span>
         </button>
       </div>
+
+      {/* Share Report Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#1c1815] border border-[#534439] rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#383430] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#f4a261]/10 text-[#f4a261] border border-[#f4a261]/30 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">share</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#e9e1dc]">Share Assessment Report</h3>
+                  <p className="text-xs text-[#a08d80]">{candidate.member.name} • {candidate.member.jobRole}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="text-[#a08d80] hover:text-[#e9e1dc] p-1.5 rounded-xl hover:bg-[#221f1c] transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            {/* Score Highlight Card */}
+            <div className="bg-[#221f1c] border border-[#383430] p-4 rounded-2xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CandidateAvatar name={candidate.member.name} size="sm" />
+                <div>
+                  <div className="text-xs font-bold text-[#e9e1dc]">{candidate.member.name}</div>
+                  <div className="text-[10px] text-[#a08d80]">Candidate ID: {candidate.member.id}</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-black text-[#ffc499]">{scores.overall} / 100</div>
+                <div className="text-[10px] text-emerald-400 font-semibold">Assessment Complete</div>
+              </div>
+            </div>
+
+            {/* Link Input Section */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#d8c2b5] block">
+                Shareable Candidate Link
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareableUrl}
+                  className="flex-1 bg-[#161310] border border-[#534439] rounded-xl px-3.5 py-2 text-xs font-mono text-[#ffc499] focus:outline-none select-all"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="bg-[#f4a261] hover:bg-[#e76f51] text-[#161310] text-xs font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {copiedLinkToast ? 'check' : 'content_copy'}
+                  </span>
+                  <span>{copiedLinkToast ? 'Copied!' : 'Copy Link'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <button
+                onClick={handleCopySummary}
+                className="p-3 bg-[#221f1c] hover:bg-[#2b2723] border border-[#383430] hover:border-[#ffc499]/50 rounded-xl transition-all text-left space-y-1 group cursor-pointer"
+              >
+                <div className="flex items-center justify-between text-[#ffc499]">
+                  <span className="material-symbols-outlined text-base">description</span>
+                  {copiedSummaryToast && <span className="text-[10px] text-emerald-400 font-bold">Copied!</span>}
+                </div>
+                <div className="text-xs font-bold text-[#e9e1dc] group-hover:text-[#ffc499] transition-colors">
+                  Copy Summary
+                </div>
+                <div className="text-[10px] text-[#a08d80]">Formatted for Slack & Email</div>
+              </button>
+
+              <button
+                onClick={handlePrintReport}
+                className="p-3 bg-[#221f1c] hover:bg-[#2b2723] border border-[#383430] hover:border-[#ffc499]/50 rounded-xl transition-all text-left space-y-1 group cursor-pointer"
+              >
+                <div className="text-[#ffc499]">
+                  <span className="material-symbols-outlined text-base">print</span>
+                </div>
+                <div className="text-xs font-bold text-[#e9e1dc] group-hover:text-[#ffc499] transition-colors">
+                  Print / Export PDF
+                </div>
+                <div className="text-[10px] text-[#a08d80]">Save printer or PDF file</div>
+              </button>
+
+              <a
+                href={`mailto:?subject=${encodeURIComponent(`CohortIQ Candidate Report: ${candidate.member.name}`)}&body=${encodeURIComponent(`Check out the assessment report for ${candidate.member.name}: ${shareableUrl}`)}`}
+                className="p-3 bg-[#221f1c] hover:bg-[#2b2723] border border-[#383430] hover:border-[#ffc499]/50 rounded-xl transition-all text-left space-y-1 group block cursor-pointer"
+              >
+                <div className="text-[#ffc499]">
+                  <span className="material-symbols-outlined text-base">mail</span>
+                </div>
+                <div className="text-xs font-bold text-[#e9e1dc] group-hover:text-[#ffc499] transition-colors">
+                  Email Team
+                </div>
+                <div className="text-[10px] text-[#a08d80]">Send via default mail app</div>
+              </a>
+            </div>
+
+            {/* Toast Notification */}
+            {(copiedLinkToast || copiedSummaryToast) && (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-2.5 rounded-xl text-xs flex items-center justify-center gap-2 animate-fade-in font-semibold">
+                <span className="material-symbols-outlined text-base">check_circle</span>
+                <span>{copiedLinkToast ? 'Report URL copied to clipboard!' : 'Executive summary copied to clipboard!'}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
