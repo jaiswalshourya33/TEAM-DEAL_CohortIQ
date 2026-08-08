@@ -76,6 +76,7 @@ export interface InterviewMessage {
   topic?: string;
   difficulty?: string;
   depth?: string;
+  attachments?: { name: string; size: string; type?: string }[];
 }
 
 export interface InterviewSession {
