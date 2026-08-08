@@ -1,3 +1,5 @@
+import { CandidateAvatar } from './CandidateAvatar';
+
 interface SidebarNavProps {
   activeView: 'dashboard' | 'candidate' | 'interviews' | 'setup' | 'room' | 'report';
   onNavigate: (view: string) => void;
@@ -18,7 +20,13 @@ export function SidebarNav({ activeView, onNavigate, candidateName }: SidebarNav
     <aside className="w-[260px] border-r border-[#383430] bg-[#191512] p-4 hidden lg:block">
       <div className="mb-6 border-b border-[#383430] pb-4">
         <div className="text-[10px] uppercase tracking-[0.2em] text-[#a08d80]">Current focus</div>
-        <div className="mt-2 text-sm font-bold text-[#e9e1dc]">{candidateName}</div>
+        <div className="mt-2.5 flex items-center gap-3 bg-[#221f1c] p-2.5 rounded-xl border border-[#383430]">
+          <CandidateAvatar name={candidateName} size="sm" />
+          <div className="overflow-hidden">
+            <div className="text-xs font-bold text-[#e9e1dc] truncate">{candidateName}</div>
+            <div className="text-[10px] text-[#a08d80]">Active Profile</div>
+          </div>
+        </div>
       </div>
 
       <nav className="space-y-2">

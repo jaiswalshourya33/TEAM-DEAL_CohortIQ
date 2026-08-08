@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CandidateProfile } from '@/types';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface InterviewsLandingViewProps {
   candidate: CandidateProfile;
@@ -214,10 +215,8 @@ export const InterviewsLandingView: React.FC<InterviewsLandingViewProps> = ({
         <div className="relative bg-[#161310] border border-[#383430] rounded-xl p-6 overflow-x-auto min-w-[700px]">
           <div className="grid grid-cols-5 gap-4 items-center text-center relative z-10">
             {/* Step 1: Candidate Profile */}
-            <div className="bg-[#221f1c] border border-[#534439] p-4 rounded-xl shadow space-y-2">
-              <div className="w-10 h-10 rounded-full bg-[#383430] flex items-center justify-center text-[#ffc499] mx-auto">
-                <span className="material-symbols-outlined text-lg">person</span>
-              </div>
+            <div className="bg-[#221f1c] border border-[#534439] p-4 rounded-xl shadow space-y-2 flex flex-col items-center justify-center">
+              <CandidateAvatar name={candidate.member.name} size="md" />
               <div className="text-xs font-bold text-[#e9e1dc]">{candidate.member.name}</div>
               <div className="text-[10px] text-[#a08d80]">30 Missions Done</div>
             </div>

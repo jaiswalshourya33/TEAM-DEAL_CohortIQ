@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CandidateProfile } from '@/types';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface InterviewSetupViewProps {
   candidate: CandidateProfile;
@@ -75,18 +76,27 @@ export const InterviewSetupView: React.FC<InterviewSetupViewProps> = ({
       </div>
 
       {/* Hero Title */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-2 bg-[#383430] border border-[#534439] px-3 py-1 rounded-full text-xs font-semibold text-[#ffc499]">
-          <span className="material-symbols-outlined text-sm">check_circle</span>
-          Custom Session Parameters Generated
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#1c1815] border border-[#534439] p-6 rounded-2xl">
+        <div className="space-y-3 flex-1">
+          <div className="inline-flex items-center gap-2 bg-[#383430] border border-[#534439] px-3 py-1 rounded-full text-xs font-semibold text-[#ffc499]">
+            <span className="material-symbols-outlined text-sm">check_circle</span>
+            Custom Session Parameters Generated
+          </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#e9e1dc]">
-          Your Interview Is Ready
-        </h1>
-        <p className="text-sm text-[#d8c2b5] max-w-3xl leading-relaxed">
-          We've custom-built this technical simulation based on <strong className="text-[#ffc499]">{candidate.member.name}</strong>'s learning history in LLM Application Development. Review session parameters and behavioral logic before starting.
-        </p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#e9e1dc]">
+            Your Interview Is Ready
+          </h1>
+          <p className="text-sm text-[#d8c2b5] max-w-3xl leading-relaxed">
+            We've custom-built this technical simulation based on <strong className="text-[#ffc499]">{candidate.member.name}</strong>'s learning history in LLM Application Development. Review session parameters and behavioral logic before starting.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 bg-[#221f1c] p-4 rounded-xl border border-[#383430] shrink-0">
+          <CandidateAvatar name={candidate.member.name} size="lg" />
+          <div>
+            <div className="text-sm font-bold text-[#e9e1dc]">{candidate.member.name}</div>
+            <div className="text-xs text-[#a08d80]">{candidate.member.jobRole}</div>
+          </div>
+        </div>
       </div>
 
       {/* Coverage Badges */}

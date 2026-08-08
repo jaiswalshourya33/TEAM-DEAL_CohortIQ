@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CandidateProfile } from '@/types';
 import { COHORT_MODULES } from '@/data/cohort';
 import { AddNoteModal } from './AddNoteModal';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface CandidateIntelligenceViewProps {
   candidate: CandidateProfile;
@@ -59,10 +60,10 @@ export const CandidateIntelligenceView: React.FC<CandidateIntelligenceViewProps>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="relative">
-              <img
-                src={candidate.member.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuCXG1I42ZZjZtFY0oR3jsr_m4znODLT1uMRX9zeSvpv4buzkj7lSvrRFOUTAUfjOtKg9xFNKkWOu87N0vacZI2X3wbiiGEYVYhUaJP6dZaIVjZ7gDrgx1v1aUjf7lhDQKTvxtPC8o3Y_0QX-oHFuH2PBkYX85tzPJzUn17GBbJZF6UboKAMfF5iIOIfSGofWKFyiU8IeSdBXyBXp0fXG_ZhZFCOh2Qw4N8x6d1QSYDUhTtq71QaRw5s"}
-                alt={candidate.member.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-[#ffc499]"
+              <CandidateAvatar
+                name={candidate.member.name}
+                size="xl"
+                isSquare={true}
               />
               <span className="absolute -bottom-2 -right-2 bg-[#f4a261] text-[#161310] font-bold text-[10px] px-2 py-0.5 rounded-full shadow">
                 {candidate.signals.matchScore || 'Top 5% Match'}

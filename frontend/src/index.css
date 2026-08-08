@@ -66,3 +66,80 @@
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* ==================== BLUISH LIGHT THEME SYSTEM ==================== */
+.theme-light {
+  background-color: #f0f4f9 !important;
+  color: #0f172a !important;
+}
+
+.theme-light body {
+  background-color: #f0f4f9 !important;
+  color: #0f172a !important;
+}
+
+/* Background Overrides */
+.theme-light .bg-\[\#161310\] { background-color: #f0f4f9 !important; }
+.theme-light .bg-\[\#161310\]\/95 { background-color: rgba(240, 244, 249, 0.95) !important; }
+.theme-light .bg-\[\#191512\] { background-color: #f8fafc !important; }
+.theme-light .bg-\[\#1c1815\] { background-color: #ffffff !important; }
+.theme-light .bg-\[\#221f1c\] { background-color: #f1f5f9 !important; }
+.theme-light .bg-\[\#2b2723\] { background-color: #e2e8f0 !important; }
+.theme-light .bg-\[\#2a221a\] { background-color: #e0f2fe !important; }
+.theme-light .bg-\[\#383430\] { background-color: #e2e8f0 !important; }
+
+/* Border Overrides */
+.theme-light .border-\[\#383430\] { border-color: #cbd5e1 !important; }
+.theme-light .border-\[\#534439\] { border-color: #94a3b8 !important; }
+.theme-light .border-\[\#ffc499\]\/50 { border-color: rgba(37, 99, 235, 0.4) !important; }
+.theme-light .border-2.border-\[\#ffc499\] { border-color: #2563eb !important; }
+.theme-light .ring-1.ring-\[\#ffc499\]\/30 { --tw-ring-color: rgba(37, 99, 235, 0.3) !important; }
+
+/* Text Overrides */
+.theme-light .text-\[\#e9e1dc\] { color: #0f172a !important; }
+.theme-light .text-\[\#d8c2b5\] { color: #334155 !important; }
+.theme-light .text-\[\#a08d80\] { color: #64748b !important; }
+.theme-light .text-\[\#ffc499\] { color: #1e40af !important; }
+.theme-light .text-\[\#f4a261\] { color: #d97706 !important; }
+
+/* Hover Overrides */
+.theme-light .hover\:bg-\[\#221f1c\]:hover { background-color: #e2e8f0 !important; }
+.theme-light .hover\:bg-\[\#2b2723\]:hover { background-color: #cbd5e1 !important; }
+.theme-light .hover\:bg-\[\#383430\]:hover { background-color: #94a3b8 !important; }
+
+/* Additional Accents & Utility Overrides */
+.theme-light .score-ring {
+  background: conic-gradient(from 0deg, #2563eb 0% 78%, #cbd5e1 78% 100%) !important;
+}
+.theme-light .grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.5) 1px, transparent 1px) !important;
+}
+.theme-light .tech-glow:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+/* Hero Container Gradient Overrides for Bluish Light Theme */
+.theme-light .bg-gradient-to-r:not(.select-none),
+.theme-light .bg-gradient-to-b:not(.select-none) {
+  background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 50%, #f1f5f9 100%) !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Gradient Text (e.g. "Your technical interview.") in Light Mode */
+.theme-light .text-transparent.bg-clip-text {
+  background-image: linear-gradient(to right, #1d4ed8, #2563eb, #d97706) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Glow and blur backdrop overrides in light theme */
+.theme-light .bg-\[\#f4a261\]\/10,
+.theme-light .bg-\[\#ffc499\]\/10,
+.theme-light .bg-\[\#ffc499\]\/5,
+.theme-light .bg-\[\#ffc499\]\/20 {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+}
+

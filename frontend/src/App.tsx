@@ -14,6 +14,20 @@ export default function App() {
   const [candidates] = useState<CandidateProfile[]>(CANDIDATES_DATA);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateProfile>(CANDIDATES_DATA[0]);
   
+  // Theme State ('dark' | 'light')
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('cohortiq_theme');
+    return saved === 'light' ? 'light' : 'dark';
+  });
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const nextTheme = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('cohortiq_theme', nextTheme);
+      return nextTheme;
+    });
+  };
+
   // Navigation Tabs
   const [activeTab, setActiveTab] = useState<'dashboard' | 'candidates' | 'interviews' | 'analytics'>('dashboard');
   // Internal View State
@@ -68,7 +82,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#161310] text-[#e9e1dc] flex flex-col font-body">
+    <div className={`min-h-screen bg-[#161310] text-[#e9e1dc] flex flex-col font-body transition-colors duration-200 ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
       {/* Top Header */}
       <TopNav
         activeTab={activeTab}
@@ -76,6 +90,8 @@ export default function App() {
         selectedCandidate={selectedCandidate}
         onSelectCandidate={(cand) => setSelectedCandidate(cand)}
         allCandidates={candidates}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <div className="flex-1 flex">

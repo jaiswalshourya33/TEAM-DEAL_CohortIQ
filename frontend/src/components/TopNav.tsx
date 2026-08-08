@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CandidateProfile } from '../types';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface TopNavProps {
   activeTab: 'dashboard' | 'candidates' | 'interviews' | 'analytics';
@@ -7,6 +8,8 @@ interface TopNavProps {
   selectedCandidate: CandidateProfile;
   onSelectCandidate: (candidate: CandidateProfile) => void;
   allCandidates: CandidateProfile[];
+  theme?: 'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -14,7 +17,9 @@ export const TopNav: React.FC<TopNavProps> = ({
   setActiveTab,
   selectedCandidate,
   onSelectCandidate,
-  allCandidates
+  allCandidates,
+  theme = 'dark',
+  onToggleTheme
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -127,15 +132,21 @@ export const TopNav: React.FC<TopNavProps> = ({
             </select>
           </div>
 
-          {/* Search Pill */}
-          <div className="hidden xl:flex items-center bg-[#1c1815] rounded-xl border border-[#383430] px-3 py-1.5 text-xs text-[#e9e1dc]">
-            <span className="material-symbols-outlined text-[#a08d80] text-base mr-1.5">search</span>
-            <input
-              type="text"
-              placeholder="Search candidate..."
-              className="bg-transparent border-none focus:outline-none text-xs w-28 text-[#e9e1dc] placeholder-[#a08d80]"
-            />
-          </div>
+          {/* Theme Toggle Button */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              title={theme === 'dark' ? 'Switch to Bluish Light Theme' : 'Switch to Dark Theme'}
+              className="flex items-center gap-1.5 bg-[#1c1815] border border-[#383430] hover:border-[#ffc499]/50 rounded-xl px-3 py-1.5 text-xs text-[#e9e1dc] transition-all cursor-pointer shadow-sm hover:shadow"
+            >
+              <span className="material-symbols-outlined text-base text-[#ffc499]">
+                {theme === 'dark' ? 'light_mode' : 'dark_mode'}
+              </span>
+              <span className="font-semibold text-[11px] hidden sm:inline">
+                {theme === 'dark' ? 'Light Theme' : 'Dark Theme'}
+              </span>
+            </button>
+          )}
 
           {/* Icon Actions */}
           <div className="flex items-center gap-1.5 border-l border-[#383430] pl-2 relative">
@@ -197,17 +208,18 @@ export const TopNav: React.FC<TopNavProps> = ({
               )}
             </div>
 
-            {/* Recruiter Avatar */}
-            <div className="relative ml-1">
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-[#534439]">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAK-SMO2Nld9ONjgGhopTfFfb5kMyPmlISY9znX5QVC9mnaGDqq7Y6jx3lTvgc0ip7V5ENfAXx08GXJhRjSHBkxnveBS6PtBNcwvnlff5zjr31821bP-lRbt-hUtwUBRSBXmVjVR3nJXKndmaFDV2v9fNBzXxyfiVHJjdbD4RjNyXglKiQgkHxpqtJzOqgBxZQnq-vwzCHj7l_jCHiskdj1GnavZPUMoJkwDRId5rXEgdXG67QTh_Lu"
-                  alt="Recruiter Profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#161310] rounded-full"></span>
-            </div>
+            {/* Active Candidate Header Profile Avatar */}
+            <button
+              onClick={() => setActiveTab('candidates')}
+              title={`Active Profile: ${selectedCandidate.member.name} (${selectedCandidate.member.jobRole})`}
+              className="relative ml-1 cursor-pointer group focus:outline-none transition-transform active:scale-95 flex items-center"
+            >
+              <CandidateAvatar
+                name={selectedCandidate.member.name}
+                size="sm"
+                showOnlineStatus={true}
+              />
+            </button>
           </div>
         </div>
       </div>

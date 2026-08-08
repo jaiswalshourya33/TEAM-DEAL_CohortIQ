@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CandidateProfile, InterviewFeedback, InterviewMessage } from '@/types';
 import { getCandidateReport } from '@/data/candidateReports';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface AssessmentReportViewProps {
   candidate: CandidateProfile;
@@ -69,21 +70,24 @@ export const AssessmentReportView: React.FC<AssessmentReportViewProps> = ({
       {/* Hero Score Card */}
       <div className="bg-[#1c1815] border border-[#534439] rounded-2xl p-6 sm:p-8 relative overflow-hidden tech-glow">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-3 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Assessment Completed
-            </div>
+          <div className="flex items-center gap-5 text-center md:text-left">
+            <CandidateAvatar name={candidate.member.name} size="lg" />
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-0.5 rounded-full mb-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Assessment Completed
+              </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#e9e1dc]">
-              {candidate.member.name}
-            </h2>
-            <div className="text-xs text-[#a08d80] flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <span>Role: {candidate.member.jobRole}</span>
-              <span>•</span>
-              <span>Candidate ID: {candidate.member.id}</span>
-              <span>•</span>
-              <span>Date: {new Date().toLocaleDateString()}</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#e9e1dc]">
+                {candidate.member.name}
+              </h2>
+              <div className="text-xs text-[#a08d80] flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <span>Role: {candidate.member.jobRole}</span>
+                <span>•</span>
+                <span>Candidate ID: {candidate.member.id}</span>
+                <span>•</span>
+                <span>Date: {new Date().toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CandidateProfile } from '@/types';
+import { CandidateAvatar } from './CandidateAvatar';
 
 interface DashboardViewProps {
   candidates: CandidateProfile[];
@@ -183,11 +184,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="group bg-[#221f1c] hover:bg-[#2b2723] border border-[#383430] hover:border-[#ffc499]/50 p-4 rounded-xl transition-all cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-3">
-                    <img
-                      src={cand.member.avatarUrl}
-                      alt={cand.member.name}
-                      className="w-10 h-10 rounded-full object-cover border border-[#534439]"
-                    />
+                    <CandidateAvatar name={cand.member.name} size="md" />
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-[#e9e1dc] group-hover:text-[#ffc499] transition-colors">
@@ -216,7 +213,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {/* Status Badge */}
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold border ${
-                        cand.member.status === 'ACTIVE_PARTICIPANT'
+                        cand.member.status === 'COMPLETED'
                           ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                           : 'bg-[#383430] text-[#d8c2b5] border-[#534439]'
                       }`}>
