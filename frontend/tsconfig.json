@@ -14,7 +14,6 @@
     "moduleDetection": "force",
     "allowJs": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "resolveJsonModule": true,
     "paths": {
       "@/*": [
