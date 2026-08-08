@@ -1,6 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CandidateProfile } from '../types';
 import { CandidateAvatar } from './CandidateAvatar';
+
+export interface NotificationItem {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  title: string;
+  desc: string;
+  time: string;
+  type: 'report' | 'alert' | 'warning' | 'info';
+  read: boolean;
+}
+
+function generateCandidateNotifications(candidates: CandidateProfile[]): NotificationItem[] {
+  const result: NotificationItem[] = [];
+
+  candidates.forEach((cand, idx) => {
+    const passed = cand.missions ? cand.missions.filter(m => m.passed).length : 28;
+    const skipped = cand.missions ? cand.missions.filter(m => m.skipped).length : 0;
+    const firstTry = cand.signals?.missionsFirstTry ?? 20;
+
+    // Assessment notification
+    result.push({
+      id: `report-${cand.member.id}`,
+      candidateId: cand.member.id,
+      candidateName: cand.member.name,
+      title: `${cand.member.name} • Assessment Complete`,
+      desc: `${cand.member.name} (${cand.member.jobRole}) completed evaluation with ${Math.round((passed / 31) * 100)}% execution score.`,
+      time: `${(idx + 1) * 12}m ago`,
+      type: 'report',
+      read: idx > 1
+    });
+
+    // Warning or Alert notification per candidate
+    if (skipped > 0) {
+      result.push({
+        id: `warning-${cand.member.id}`,
+        candidateId: cand.member.id,
+        candidateName: cand.member.name,
+        title: `${cand.member.name} • Skipped Module Alert`,
+        desc: `Candidate skipped ${skipped} curriculum module(s). Targeted AI interview recommended.`,
+        time: `${(idx + 1) * 35}m ago`,
+        type: 'warning',
+        read: idx > 0
+      });
+    } else if (firstTry >= 25) {
+      result.push({
+        id: `alert-${cand.member.id}`,
+        candidateId: cand.member.id,
+        candidateName: cand.member.name,
+        title: `${cand.member.name} • Top 5% Performer`,
+        desc: `Achieved ${firstTry} first-try module passes across the 31-day AI engineering cohort.`,
+        time: `${(idx + 1) * 2}h ago`,
+        type: 'alert',
+        read: idx > 1
+      });
+    }
+  });
+
+  return result;
+}
 
 interface TopNavProps {
   activeTab: 'dashboard' | 'candidates' | 'interviews' | 'analytics';
@@ -23,44 +83,39 @@ export const TopNav: React.FC<TopNavProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Assessment Report Generated",
-      desc: "Sarah Johnson completed 20-min technical interview. Overall score: 88%.",
-      time: "10 mins ago",
-      type: "report",
-      read: false
-    },
-    {
-      id: 2,
-      title: "Top 1% Cohort Score Alert",
-      desc: "Emily Chen achieved 30 first-try completions in 31 days.",
-      time: "1 hour ago",
-      type: "alert",
-      read: false
-    },
-    {
-      id: 3,
-      title: "Skipped Module Warning",
-      desc: "David Miller skipped Day 28 Docker deployment module.",
-      time: "2 hours ago",
-      type: "warning",
-      read: false
-    }
-  ]);
+  const [notificationFilter, setNotificationFilter] = useState<'all' | 'active'>('all');
+  
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() =>
+    generateCandidateNotifications(allCandidates)
+  );
 
-  // Settings State
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
-  const [interviewRigor, setInterviewRigor] = useState("adaptive");
-  const [questionCount, setQuestionCount] = useState(8);
-  const [audioVoiceEnabled, setAudioVoiceEnabled] = useState(true);
   const [savedToast, setSavedToast] = useState(false);
+
+  useEffect(() => {
+    setNotifications(generateCandidateNotifications(allCandidates));
+  }, [allCandidates]);
+
+  const filteredNotifications = notifications.filter(n => {
+    if (notificationFilter === 'active') {
+      return n.candidateId === selectedCandidate.member.id;
+    }
+    return true;
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
+  };
+
+  const handleNotificationClick = (item: NotificationItem) => {
+    const target = allCandidates.find(c => c.member.id === item.candidateId);
+    if (target) {
+      onSelectCandidate(target);
+    }
+    setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, read: true } : n));
+    setShowNotifications(false);
+    setActiveTab('candidates');
   };
 
   const handleSaveSettings = () => {
@@ -171,38 +226,81 @@ export const TopNav: React.FC<TopNavProps> = ({
               {/* Notification Popup Dropdown */}
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#1c1815] border border-[#534439] rounded-2xl shadow-2xl p-4 z-50 space-y-3 animate-fade-in">
+                  {/* Header Bar */}
                   <div className="flex items-center justify-between border-b border-[#383430] pb-2">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-sm text-[#ffc499]">notifications_active</span>
                       <span className="text-xs font-bold text-[#e9e1dc]">Recruiter Notifications</span>
+                      {unreadCount > 0 && (
+                        <span className="bg-[#f4a261]/20 text-[#f4a261] border border-[#f4a261]/30 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
                     </div>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllRead}
-                        className="text-[10px] text-[#f4a261] hover:underline font-semibold"
+                        className="text-[10px] text-[#f4a261] hover:underline font-semibold cursor-pointer"
                       >
                         Mark all read
                       </button>
                     )}
                   </div>
 
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {notifications.map(n => (
-                      <div
-                        key={n.id}
-                        className={`p-3 rounded-xl border text-xs space-y-1 transition-colors ${
-                          n.read
-                            ? 'bg-[#161310] border-[#383430] opacity-70'
-                            : 'bg-[#221f1c] border-[#ffc499]/30'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between font-bold text-[#e9e1dc]">
-                          <span>{n.title}</span>
-                          <span className="text-[10px] text-[#a08d80] font-normal">{n.time}</span>
-                        </div>
-                        <p className="text-[#d8c2b5] text-[11px] leading-relaxed">{n.desc}</p>
+                  {/* Filter Tabs */}
+                  <div className="flex items-center gap-1.5 bg-[#161310] p-1 rounded-xl border border-[#383430]">
+                    <button
+                      onClick={() => setNotificationFilter('all')}
+                      className={`flex-1 text-[11px] font-bold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+                        notificationFilter === 'all'
+                          ? 'bg-[#383430] text-[#ffc499]'
+                          : 'text-[#a08d80] hover:text-[#e9e1dc]'
+                      }`}
+                    >
+                      All Candidates ({notifications.length})
+                    </button>
+                    <button
+                      onClick={() => setNotificationFilter('active')}
+                      className={`flex-1 text-[11px] font-bold py-1 px-2 rounded-lg transition-colors cursor-pointer ${
+                        notificationFilter === 'active'
+                          ? 'bg-[#383430] text-[#ffc499]'
+                          : 'text-[#a08d80] hover:text-[#e9e1dc]'
+                      }`}
+                    >
+                      Active ({selectedCandidate.member.name.split(' ')[0]})
+                    </button>
+                  </div>
+
+                  {/* Notifications List */}
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    {filteredNotifications.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-[#a08d80]">
+                        No notifications for this filter.
                       </div>
-                    ))}
+                    ) : (
+                      filteredNotifications.map(n => (
+                        <div
+                          key={n.id}
+                          onClick={() => handleNotificationClick(n)}
+                          className={`p-3 rounded-xl border text-xs space-y-1.5 transition-all cursor-pointer group hover:border-[#ffc499]/50 ${
+                            n.read
+                              ? 'bg-[#161310] border-[#383430] opacity-80 hover:opacity-100'
+                              : 'bg-[#221f1c] border-[#ffc499]/30'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <CandidateAvatar name={n.candidateName} size="xs" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between font-bold text-[#e9e1dc] group-hover:text-[#ffc499] transition-colors">
+                                <span className="truncate">{n.title}</span>
+                                <span className="text-[10px] text-[#a08d80] font-normal shrink-0 ml-1">{n.time}</span>
+                              </div>
+                              <p className="text-[#d8c2b5] text-[11px] leading-relaxed line-clamp-2 mt-0.5">{n.desc}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
