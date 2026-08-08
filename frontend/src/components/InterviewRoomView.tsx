@@ -22,8 +22,32 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
   const [currentTopic, setCurrentTopic] = useState('Day 1-7: Embeddings & Vector Search');
   const [difficulty, setDifficulty] = useState('Advanced');
   const [isCodeMode, setIsCodeMode] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selected = Array.from(e.target.files);
+      setAttachedFiles(prev => [...prev, ...selected]);
+    }
+    if (e.target) e.target.value = '';
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Timer effect
   useEffect(() => {
@@ -101,20 +125,34 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
   // Send candidate answer to backend
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || isLoading) return;
+    if ((!inputText.trim() && attachedFiles.length === 0) || isLoading) return;
 
-    const userMsgText = inputText.trim();
+    const rawInput = inputText.trim();
+    const currentAttachments = attachedFiles.map(f => ({
+      name: f.name,
+      size: formatFileSize(f.size),
+      type: f.type
+    }));
+
+    const userMsgText = rawInput || (currentAttachments.length > 0 ? `Attached ${currentAttachments.length} file(s)` : '');
+
     setInputText('');
+    setAttachedFiles([]);
 
     const userMsg: InterviewMessage = {
       id: Date.now().toString(),
       sender: 'user',
       text: userMsgText,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      attachments: currentAttachments.length > 0 ? currentAttachments : undefined
     };
 
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
+
+    const apiPayloadMessage = currentAttachments.length > 0
+      ? `${userMsgText}\n\n[Attached Files: ${currentAttachments.map(a => a.name).join(', ')}]`
+      : userMsgText;
 
     try {
       const res = await fetch('/api/interview', {
@@ -122,7 +160,7 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          message: userMsgText
+          message: apiPayloadMessage
         })
       });
 
@@ -326,7 +364,21 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
                       : 'bg-[#221f1c] border border-[#534439] text-[#e9e1dc] rounded-tl-none whitespace-pre-line'
                   }`}
                 >
-                  {msg.text}
+                  <div>{msg.text}</div>
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mt-2.5 pt-2 border-t border-[#161310]/20 space-y-1.5">
+                      {msg.attachments.map((att, attIdx) => (
+                        <div
+                          key={attIdx}
+                          className="flex items-center gap-2 bg-[#161310]/15 p-2 rounded-lg text-xs font-semibold"
+                        >
+                          <span className="material-symbols-outlined text-sm">attachment</span>
+                          <span className="underline truncate">{att.name}</span>
+                          <span className="text-[10px] opacity-80">({att.size})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -354,6 +406,30 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
           {/* Input Box Bar */}
           <div className="border-t border-[#383430] p-4 bg-[#161310] space-y-3">
             <form onSubmit={handleSendMessage} className="space-y-3">
+              {/* Attached Files Chips Bar */}
+              {attachedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 bg-[#1c1815] rounded-xl border border-[#383430]">
+                  {attachedFiles.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 bg-[#221f1c] text-[#e9e1dc] text-xs px-3 py-1.5 rounded-lg border border-[#534439] shadow-sm animate-fade-in"
+                    >
+                      <span className="material-symbols-outlined text-sm text-[#ffc499]">description</span>
+                      <span className="font-semibold max-w-[150px] truncate">{file.name}</span>
+                      <span className="text-[10px] text-[#a08d80]">({formatFileSize(file.size)})</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(idx)}
+                        className="text-[#a08d80] hover:text-rose-400 p-0.5 ml-1 transition-colors cursor-pointer"
+                        title="Remove attachment"
+                      >
+                        <span className="material-symbols-outlined text-xs">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="relative">
                 <textarea
                   rows={isCodeMode ? 4 : 2}
@@ -384,7 +460,7 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsCodeMode(!isCodeMode)}
-                    className={`text-xs px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer ${
                       isCodeMode
                         ? 'bg-[#ffc499] text-[#161310] font-bold border-[#ffc499]'
                         : 'bg-[#221f1c] text-[#d8c2b5] border-[#534439] hover:bg-[#383430]'
@@ -396,17 +472,32 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
 
                   <button
                     type="button"
-                    className="text-xs px-2.5 py-1 bg-[#221f1c] hover:bg-[#383430] text-[#d8c2b5] rounded-lg border border-[#534439] transition-colors flex items-center gap-1"
+                    onClick={handleFileClick}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 cursor-pointer ${
+                      attachedFiles.length > 0
+                        ? 'bg-[#ffc499]/20 text-[#ffc499] border-[#ffc499]/50 font-bold'
+                        : 'bg-[#221f1c] hover:bg-[#383430] text-[#d8c2b5] border-[#534439]'
+                    }`}
+                    title="Attach files to your response"
                   >
                     <span className="material-symbols-outlined text-sm">attach_file</span>
-                    <span>Attach File</span>
+                    <span>Attach File {attachedFiles.length > 0 ? `(${attachedFiles.length})` : ''}</span>
                   </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    multiple
+                    accept=".pdf,.doc,.docx,.txt,.json,.py,.ts,.tsx,.js,.csv,.png,.jpg,.jpeg"
+                  />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={!inputText.trim() || isLoading}
-                  className="bg-[#f4a261] hover:bg-[#e76f51] disabled:opacity-50 text-[#161310] font-bold py-2 px-6 rounded-xl transition-all shadow flex items-center gap-2 text-xs"
+                  disabled={(!inputText.trim() && attachedFiles.length === 0) || isLoading}
+                  className="bg-[#f4a261] hover:bg-[#e76f51] disabled:opacity-50 text-[#161310] font-bold py-2 px-6 rounded-xl transition-all shadow flex items-center gap-2 text-xs cursor-pointer"
                 >
                   <span>Submit Response</span>
                   <span className="material-symbols-outlined text-sm">send</span>
