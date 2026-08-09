@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     font-family: 'Inter', sans-serif;
     background-color: #161310;
@@ -10,6 +15,29 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Manrope', sans-serif;
   }
+}
+
+/* Custom Sleek Scrollbar & Side-scroll prevention */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 0px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(160, 141, 128, 0.3);
+  border-radius: 9999px;
+}
+
+.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 141, 128, 0.6);
 }
 
 .grid-bg {
@@ -82,6 +110,9 @@
 .theme-light .bg-\[\#161310\]\/95 { background-color: rgba(240, 244, 249, 0.95) !important; }
 .theme-light .bg-\[\#191512\] { background-color: #f8fafc !important; }
 .theme-light .bg-\[\#1c1815\] { background-color: #ffffff !important; }
+.theme-light .bg-\[\#1c1815\]\/95,
+.theme-light .bg-\[\#1c1815\]\/90,
+.theme-light .bg-\[\#1c1815\]\/80 { background-color: rgba(255, 255, 255, 0.9) !important; }
 .theme-light .bg-\[\#221f1c\] { background-color: #f1f5f9 !important; }
 .theme-light .bg-\[\#2b2723\] { background-color: #e2e8f0 !important; }
 .theme-light .bg-\[\#2a221a\] { background-color: #e0f2fe !important; }
@@ -120,9 +151,9 @@
   border-color: rgba(37, 99, 235, 0.4) !important;
 }
 
-/* Hero Container Gradient Overrides for Bluish Light Theme */
-.theme-light .bg-gradient-to-r:not(.select-none),
-.theme-light .bg-gradient-to-b:not(.select-none) {
+/* Hero Container Gradient Overrides for Bluish Light Theme - Exclude buttons */
+.theme-light div.bg-gradient-to-r:not(.select-none):not(button),
+.theme-light div.bg-gradient-to-b:not(.select-none):not(button) {
   background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 50%, #f1f5f9 100%) !important;
   border-color: #cbd5e1 !important;
 }

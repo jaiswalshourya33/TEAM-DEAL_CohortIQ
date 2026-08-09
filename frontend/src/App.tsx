@@ -9,11 +9,15 @@ import { InterviewsLandingView } from '@/components/InterviewsLandingView';
 import { InterviewSetupView } from '@/components/InterviewSetupView';
 import { InterviewRoomView } from '@/components/InterviewRoomView';
 import { AssessmentReportView } from '@/components/AssessmentReportView';
+import { WelcomeView } from '@/components/WelcomeView';
 
 export default function App() {
   const [candidates] = useState<CandidateProfile[]>(CANDIDATES_DATA);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateProfile>(CANDIDATES_DATA[0]);
   
+  // Welcome / Start Page State (true shows start page before main page opens)
+  const [showWelcome, setShowWelcome] = useState<boolean>(true);
+
   // Theme State ('dark' | 'light')
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('cohortiq_theme');
@@ -81,6 +85,21 @@ export default function App() {
     setActiveTab('analytics');
   };
 
+  // Render Welcome Start Page before opening main application
+  if (showWelcome) {
+    return (
+      <div className={`min-h-screen w-full ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
+        <WelcomeView
+          onEnter={() => setShowWelcome(false)}
+          candidates={candidates}
+          onSelectCandidate={(cand) => setSelectedCandidate(cand)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen bg-[#161310] text-[#e9e1dc] flex flex-col font-body transition-colors duration-200 ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
       {/* Top Header */}
@@ -92,6 +111,7 @@ export default function App() {
         allCandidates={candidates}
         theme={theme}
         onToggleTheme={toggleTheme}
+        onGoToWelcome={() => setShowWelcome(true)}
       />
 
       <div className="flex-1 flex">
