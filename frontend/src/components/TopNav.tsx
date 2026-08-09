@@ -70,6 +70,7 @@ interface TopNavProps {
   allCandidates: CandidateProfile[];
   theme?: 'dark' | 'light';
   onToggleTheme?: () => void;
+  onGoToWelcome?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -79,7 +80,8 @@ export const TopNav: React.FC<TopNavProps> = ({
   onSelectCandidate,
   allCandidates,
   theme = 'dark',
-  onToggleTheme
+  onToggleTheme,
+  onGoToWelcome
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -132,8 +134,9 @@ export const TopNav: React.FC<TopNavProps> = ({
         {/* Left Section: Brand & Segmented Nav */}
         <div className="flex items-center gap-6 sm:gap-8">
           <div 
-            onClick={() => setActiveTab('candidates')} 
+            onClick={() => onGoToWelcome ? onGoToWelcome() : setActiveTab('dashboard')} 
             className="text-xl font-extrabold text-[#ffc499] flex items-center gap-2 cursor-pointer group tracking-tight"
+            title="Return to Start Page"
           >
             <span className="material-symbols-outlined text-[#ffc499] group-hover:rotate-90 transition-transform duration-300">
               schema
