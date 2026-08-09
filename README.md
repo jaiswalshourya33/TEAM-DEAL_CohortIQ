@@ -12,7 +12,7 @@ The AI interviewer dynamically adapts its questions based on the candidate's pre
 
 ## 🚀 Live Demo
 
-### 🌐🔗 Live Demo 
+### 🔗 https://team-deal-cohort-iq.vercel.app/
 
 ---
 
