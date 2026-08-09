@@ -777,17 +777,17 @@ ChatGPT was primarily used as an architecture, reasoning, prompt-engineering, de
 
 Used for:
 
-Generating the initial frontend UI.
+- Generating the initial frontend UI.
 
-Designing the application screens.
+- Designing the application screens.
 
-Exploring the visual direction of the product.
+- Exploring the visual direction of the product.
 
-Creating the page layouts and component structure.
+- Creating the page layouts and component structure.
 
-Establishing the visual language for the interview experience.
+- Establishing the visual language for the interview experience.
 
-Iterating on the UI and UX.
+- Iterating on the UI and UX.
 
 The Stitch-generated frontend was treated as the primary visual reference for the application.
 
@@ -795,19 +795,19 @@ The Stitch-generated frontend was treated as the primary visual reference for th
 
 Used for:
 
-AI-assisted application generation.
+- AI-assisted application generation.
 
-Integrating the Gemini-powered interview functionality.
+- Integrating the Gemini-powered interview functionality.
 
-Connecting the frontend and backend.
+- Connecting the frontend and backend.
 
-Working with the supplied curriculum and candidate data.
+- Working with the supplied curriculum and candidate data.
 
-Implementing the interview-agent workflow.
+- Implementing the interview-agent workflow.
 
 Generating and refining application logic.
 
-Local development setup and environment configuration.
+- Local development setup and environment configuration.
 
 Google AI Studio was used as an important part of the AI-assisted implementation workflow.
 
@@ -815,23 +815,23 @@ Google AI Studio was used as an important part of the AI-assisted implementation
 
 Used for:
 
-AI-assisted coding and implementation.
+- AI-assisted coding and implementation.
 
-Refining the existing application rather than rebuilding it.
+- Refining the existing application rather than rebuilding it.
 
-Implementing candidate-specific interview orchestration.
+- Implementing candidate-specific interview orchestration.
 
-Improving adaptive question generation.
+- Improving adaptive question generation.
 
-Connecting candidate learning signals to interview planning.
+- Connecting candidate learning signals to interview planning.
 
-Implementing interview evaluation logic.
+- Implementing interview evaluation logic.
 
-Generating interview reports from actual interview performance.
+- Generating interview reports from actual interview performance.
 
-Debugging and modifying the existing codebase.
+- Debugging and modifying the existing codebase.
 
-Maintaining the existing frontend architecture while extending functionality.
+- Maintaining the existing frontend architecture while extending functionality.
 
 Antigravity was used as the primary AI coding and implementation assistant during later development iterations.
 
@@ -839,107 +839,107 @@ Antigravity was used as the primary AI coding and implementation assistant durin
 
 Used as the underlying generative AI capability for:
 
-Technical question generation.
+- Technical question generation.
 
-Candidate-aware question generation.
+- Candidate-aware question generation.
 
-Follow-up question generation.
+- Follow-up question generation.
 
-Answer evaluation.
+- Answer evaluation.
 
-Adaptive interview progression.
+- Adaptive interview progression.
 
-Technical reasoning assessment.
+- Technical reasoning assessment.
 
-Final interview feedback generation.
+- Final interview feedback generation.
 
-Gemini powers the conversational intelligence of the AI interviewer.
+- Gemini powers the conversational intelligence of the AI interviewer.
 
 #### 6. VS Code
 
 Used for:
 
-Local development.
+- Local development.
 
-Code inspection.
+- Code inspection.
 
-Debugging.
+- Debugging.
 
-Running the application.
+- Running the application.
 
-Managing the project structure.
+- Managing the project structure.
 
-Environment-variable configuration.
+- Environment-variable configuration.
 
-Git/GitHub integration.
+- Git/GitHub integration.
 
-Testing frontend and backend behavior.
+- Testing frontend and backend behavior.
 
 #### 7. Git & GitHub
 
 Used for:
 
-Version control.
+- Version control.
 
-Branch management.
+- Branch management.
 
-Collaboration.
+- Collaboration.
 
-Code review.
+- Code review.
 
-Project backup and sharing.
+- Project backup and sharing.
 
-Team-based development.
+- Team-based development.
 
-API keys and secrets are excluded from version control using .gitignore.
+- API keys and secrets are excluded from version control using .gitignore.
 
 #### 8. Node.js / npm
 
 Used for:
 
-Backend runtime.
+- Backend runtime.
 
-Dependency management.
+- Dependency management.
 
-Running the development environment.
+- Running the development environment.
 
-Building and serving the application.
+- Building and serving the application.
 
 #### 9. React + Vite
 
 Used for:
 
-Frontend application development.
+- Frontend application development.
 
-Component-based UI.
+- Component-based UI.
 
-Interview state management.
+- Interview state management.
 
-Candidate profile presentation.
+- Candidate profile presentation.
 
-Interview room.
+- Interview room.
 
-Interview progress.
+- Interview progress.
 
-Interview report.
+- Interview report.
 
 #### 10. Express.js
 
 Used for:
 
-Backend HTTP server.
+- Backend HTTP server.
 
-Interview API.
+- Interview API.
 
-Connecting the frontend with the AI interview agent.
+- Connecting the frontend with the AI interview agent.
 
-Maintaining interview sessions.
+- Maintaining interview sessions.
 
-Processing candidate responses.
+- Processing candidate responses.
 
-AI-Assisted / Vibe Coding Workflow
+- AI-Assisted / Vibe Coding Workflow
 
-The project followed an iterative AI-assisted development process:
+- The project followed an iterative AI-assisted development process:
 
 Problem Statement
        ↓
@@ -1041,14 +1041,14 @@ AI tools were used as development accelerators and engineering assistants, while
 
 ### Notes
 
-The curriculum and candidate profiles are synthetic challenge data.
+- The curriculum and candidate profiles are synthetic challenge data.
 
-The Technical Specification is authoritative for the API contract.
+- The Technical Specification is authoritative for the API contract.
 
-The existing Stitch frontend should remain visually intact.
+- The existing Stitch frontend should remain visually intact.
 
-Backend logic should be modified without unnecessarily changing the UI.
+- Backend logic should be modified without unnecessarily changing the UI.
 
-API keys must never be committed.
+- API keys must never be committed.
 
-Personalization should be based on meaningful candidate data, not random topic selection.
+- Personalization should be based on meaningful candidate data, not random topic selection.
