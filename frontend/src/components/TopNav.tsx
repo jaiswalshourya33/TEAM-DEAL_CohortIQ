@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CandidateProfile } from '../types';
 import { CandidateAvatar } from './CandidateAvatar';
+import { CohortIQLogo } from './CohortIQLogo';
 
 export interface NotificationItem {
   id: string;
@@ -133,16 +134,13 @@ export const TopNav: React.FC<TopNavProps> = ({
       <div className="flex items-center justify-between max-w-7xl mx-auto gap-4">
         {/* Left Section: Brand & Segmented Nav */}
         <div className="flex items-center gap-6 sm:gap-8">
-          <div 
-            onClick={() => onGoToWelcome ? onGoToWelcome() : setActiveTab('dashboard')} 
-            className="text-xl font-extrabold text-[#ffc499] flex items-center gap-2 cursor-pointer group tracking-tight"
-            title="Return to Start Page"
-          >
-            <span className="material-symbols-outlined text-[#ffc499] group-hover:rotate-90 transition-transform duration-300">
-              schema
-            </span>
-            <span>CohortIQ</span>
-          </div>
+          <CohortIQLogo
+            theme={theme}
+            size="md"
+            showBadge={true}
+            showSubtitle={false}
+            onClick={onGoToWelcome ? onGoToWelcome : () => setActiveTab('dashboard')}
+          />
 
           {/* Segmented Tab Navigation Bar */}
           <nav className="hidden md:flex items-center gap-1 bg-[#1c1815] p-1 rounded-xl border border-[#383430]">

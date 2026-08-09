@@ -1,6 +1,7 @@
 import React from 'react';
 import { CandidateProfile } from '@/types';
 import { CandidateAvatar } from './CandidateAvatar';
+import { CohortIQLogo } from './CohortIQLogo';
 import LiquidEther from './LiquidEther';
 
 interface WelcomeViewProps {
@@ -70,32 +71,12 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
           ? 'bg-white/85 border-slate-200/80 text-slate-900' 
           : 'bg-[#161310]/95 border-[#383430]/70 text-[#e9e1dc]'
       }`}>
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shadow-md ${
-            isLight 
-              ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-blue-500/20' 
-              : 'bg-gradient-to-br from-[#ffc499] to-[#f4a261] text-[#161310] shadow-[#ffc499]/20'
-          }`}>
-            C
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-header text-xl font-bold tracking-tight">
-                Cohort<span className={isLight ? 'text-blue-600' : 'text-[#ffc499]'}>IQ</span>
-              </span>
-              <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold border rounded-full ${
-                isLight 
-                  ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                  : 'bg-[#ffc499]/10 text-[#ffc499] border-[#ffc499]/30'
-              }`}>
-                v2.4 AI Platform
-              </span>
-            </div>
-            <p className={`text-xs hidden sm:block ${isLight ? 'text-slate-500' : 'text-[#a08d80]'}`}>
-              Candidate Intelligence & Live Technical Interviewer
-            </p>
-          </div>
-        </div>
+        <CohortIQLogo
+          theme={theme}
+          size="md"
+          showBadge={true}
+          showSubtitle={true}
+        />
 
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Theme Toggle Button */}
