@@ -746,8 +746,8 @@ This project was developed collaboratively by:
 
 ### Contributors:
 
-Shourya Jaiswal
-Parv Chaudhary
+1. Shourya Jaiswal
+2. Parv Chaudhary
 
 
 The architecture was designed to allow multiple contributors to work independently across the frontend, backend, AI orchestration, and data layers.
