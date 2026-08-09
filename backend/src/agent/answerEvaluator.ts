@@ -18,6 +18,7 @@ export interface EvaluationResult {
   isStrong: boolean;
   needsFollowup: boolean;
   keyInsights: string;
+  technicalDepth: 'high' | 'medium' | 'low';
 }
 
 export class AnswerEvaluator {
@@ -31,11 +32,12 @@ TOPIC: ${topic}
 QUESTION ASKED: ${currentQuestion}
 CANDIDATE ANSWER: ${candidateAnswer}
 
-Evaluate the candidate's answer in JSON format:
+Evaluate the candidate's answer strictly in JSON format matching this schema:
 {
-  "isStrong": true/false,
-  "needsFollowup": true/false,
-  "keyInsights": "1-2 sentences on correctness and depth"
+  "isStrong": boolean (true if response shows solid technical understanding, false if vague/shallow),
+  "needsFollowup": boolean (true if candidate missed key concepts or gave a incomplete answer worth probing deeper),
+  "keyInsights": "1-2 sentences summarizing candidate's strengths, missing concepts, or technical depth",
+  "technicalDepth": "high" | "medium" | "low"
 }`;
 
         const response = await ai.models.generateContent({
@@ -51,7 +53,8 @@ Evaluate the candidate's answer in JSON format:
           return {
             isStrong: !!parsed.isStrong,
             needsFollowup: !!parsed.needsFollowup,
-            keyInsights: parsed.keyInsights || 'Answer provided relevant technical concepts.'
+            keyInsights: parsed.keyInsights || 'Answer provided relevant technical concepts.',
+            technicalDepth: (parsed.technicalDepth as any) || (parsed.isStrong ? 'high' : 'low')
           };
         }
       } catch (err: any) {
@@ -59,11 +62,25 @@ Evaluate the candidate's answer in JSON format:
       }
     }
 
-    const isLongEnough = candidateAnswer.length > 50;
+    // Fallback heuristic answer evaluator
+    const textLen = candidateAnswer.trim().length;
+    const lowerAnswer = candidateAnswer.toLowerCase();
+    const keywords = ['trade-off', 'latency', 'cost', 'scaling', 'index', 'vector', 'retrieval', 'schema', 'pipeline', 'deployment', 'docker', 'model', 'api', 'architecture', 'evaluation'];
+    const matchedCount = keywords.filter(k => lowerAnswer.includes(k)).length;
+
+    const isStrong = textLen > 70 && matchedCount >= 2;
+    const needsFollowup = textLen < 50 || matchedCount === 0;
+    const technicalDepth = isStrong ? 'high' : textLen > 40 ? 'medium' : 'low';
+
     return {
-      isStrong: isLongEnough,
-      needsFollowup: !isLongEnough,
-      keyInsights: isLongEnough ? 'Candidate provided a structured explanation.' : 'Candidate provided a brief overview.'
+      isStrong,
+      needsFollowup,
+      keyInsights: isStrong
+        ? 'Candidate provided a detailed technical explanation addressing trade-offs.'
+        : needsFollowup
+        ? 'Candidate response was brief; worth probing deeper into implementation details.'
+        : 'Candidate provided a satisfactory high-level overview.',
+      technicalDepth
     };
   }
 }
