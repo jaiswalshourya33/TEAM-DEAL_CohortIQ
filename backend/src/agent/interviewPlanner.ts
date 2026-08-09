@@ -1,162 +1,223 @@
 import { CandidateProfile } from '../services/candidate.service';
 import { curriculumService } from '../services/curriculum.service';
 
+export interface ClassifiedTopic {
+  dayNumber: number;
+  title: string;
+  status: 'COMPLETED' | 'ATTEMPTED / NEEDS PROBING' | 'FAILED' | 'SKIPPED' | 'NOT COVERED';
+  attempts: number;
+  relevanceScore: number;
+}
+
 export interface PlannedTopic {
   dayNumber: number;
   title: string;
   focusArea: string;
   isProbeTarget?: boolean;
+  status: string;
 }
 
 export interface InterviewPlan {
+  candidateId: string;
+  candidateName: string;
+  jobRole: string;
+  yearsExperience: number;
+  selectedDays: number[];
+  selectedTopics: string[];
+  priorityAreas: string[];
   startingDay: number;
+  difficulty: 'Foundational' | 'Intermediate' | 'Advanced';
+  minimumQuestions: number;
+  minimumDays: number;
   targetDays: PlannedTopic[];
-  totalQuestions: number;
-  initialDifficulty: string;
   candidateTopicPool: number[];
   skippedDays: number[];
+  classifiedTopics: Record<number, ClassifiedTopic>;
 }
 
 export class InterviewPlanner {
   planInterview(candidate: CandidateProfile): InterviewPlan {
-    const candidateExp = candidate.member.yearsExperience || 0;
-    const jobRole = (candidate.member.jobRole || '').toLowerCase();
+    const candidateId = candidate.member.id || 'CAND-UNKNOWN';
+    const candidateName = candidate.member.name || 'Candidate';
+    const jobRole = candidate.member.jobRole || 'Software Engineer';
+    const yearsExperience = candidate.member.yearsExperience || 0;
+    const lowerRole = jobRole.toLowerCase();
 
-    // 1. Separate missions into passed, probed, and skipped
-    const passedMissions = candidate.missions.filter(m => m.passed === true);
-    const probeMissions = candidate.missions.filter(
-      m => (m.passed === true && (m.attempts || 1) >= 2) || m.passed === false
-    );
-    const skippedMissions = candidate.missions.filter(m => m.skipped === true);
-    const skippedDays = skippedMissions.map(m => m.day);
+    // 1. Role-aware priority days lookup
+    const rolePreferredDays = this.getRolePreferredDays(lowerRole);
 
-    // 2. Map role relevance to curriculum days
-    const rolePreferences: number[] = this.getRolePreferredDays(jobRole);
+    // 2. Classify all 31 curriculum days for candidate
+    const classifiedTopics: Record<number, ClassifiedTopic> = {};
+    const skippedDays: number[] = [];
+    const candidateMissions = candidate.missions || [];
 
-    // 3. Score all completed or attempted candidate days
-    // Candidate Topic Pool consists primarily of completed missions plus failed missions worth probing
-    const candidateDays = candidate.missions
-      .filter(m => !m.skipped)
-      .map(m => m.day);
+    const allCurriculumDays = curriculumService.getAllDays();
 
-    // If candidate has very few completed missions, fall back to curriculum days aligned with role
-    let availablePool = [...candidateDays];
-    if (availablePool.length < 4) {
-      for (const prefDay of rolePreferences) {
-        if (!availablePool.includes(prefDay) && !skippedDays.includes(prefDay)) {
-          availablePool.push(prefDay);
-        }
-      }
-    }
+    allCurriculumDays.forEach(curDay => {
+      const dNum = curDay.day;
+      const mission = candidateMissions.find(m => m.day === dNum);
 
-    // Score days based on role preference, probe flags (attempts/failed), and completion
-    const scoredDays = availablePool.map(dNum => {
-      const mission = candidate.missions.find(m => m.day === dNum);
-      let score = 10;
-
-      // Role preference boost
-      if (rolePreferences.includes(dNum)) score += 15;
-
-      // Probe boost (failed missions or multiple attempts)
-      if (mission?.passed === false) score += 20;
-      if (mission?.attempts && mission.attempts > 2) score += 12;
-
-      // Capstone project boost
-      if (dNum === 31) score += 5;
-
-      return { dayNumber: dNum, score, mission };
-    });
-
-    // Sort by priority score descending
-    scoredDays.sort((a, b) => b.score - a.score);
-
-    // Pick top 5-6 target days for candidate's plan
-    const selectedDayNumbers: number[] = [];
-    for (const item of scoredDays) {
-      if (!selectedDayNumbers.includes(item.dayNumber) && selectedDayNumbers.length < 6) {
-        selectedDayNumbers.push(item.dayNumber);
-      }
-    }
-
-    // Ensure we have at least 4 distinct days in the plan
-    if (selectedDayNumbers.length < 4) {
-      const allDays = curriculumService.getAllDays().map(d => d.day);
-      for (const d of allDays) {
-        if (!selectedDayNumbers.includes(d) && !skippedDays.includes(d)) {
-          selectedDayNumbers.push(d);
-          if (selectedDayNumbers.length >= 5) break;
-        }
-      }
-    }
-
-    // Select starting day: Pick the highest scored topic that best aligns with role/probe
-    const startingDay = selectedDayNumbers[0] || candidateDays[0] || 7;
-
-    // Build planned topics list
-    const targetDays: PlannedTopic[] = selectedDayNumbers.map(dNum => {
-      const dayObj = curriculumService.getDayByNumber(dNum);
-      const mission = candidate.missions.find(m => m.day === dNum);
-      let focusArea = 'Practical application & architecture';
-      let isProbeTarget = false;
+      let status: 'COMPLETED' | 'ATTEMPTED / NEEDS PROBING' | 'FAILED' | 'SKIPPED' | 'NOT COVERED' = 'NOT COVERED';
+      let attempts = 0;
+      let score = 5; // Base score
 
       if (mission) {
-        if (mission.passed === false) {
-          focusArea = `Diagnostic probe on mission gap (${mission.attempts || 1} failed attempts)`;
-          isProbeTarget = true;
-        } else if (mission.attempts && mission.attempts > 2) {
-          focusArea = `Probing perseverance & resolution (${mission.attempts} attempts)`;
-          isProbeTarget = true;
+        attempts = mission.attempts || 1;
+        if (mission.skipped) {
+          status = 'SKIPPED';
+          score = -50; // Exclude from active question pool
+          skippedDays.push(dNum);
+        } else if (mission.passed === false) {
+          status = 'FAILED';
+          score += 40; // High priority probing target
         } else if (mission.passed) {
-          focusArea = 'Core implementation & trade-offs';
+          if (attempts >= 2) {
+            status = 'ATTEMPTED / NEEDS PROBING';
+            score += 35; // Probing target
+          } else {
+            status = 'COMPLETED';
+            score += 25; // Completed topic
+          }
         }
-      } else {
-        focusArea = 'Role-aligned technical assessment';
       }
 
-      return {
+      // Role preference boost based on position in preference list
+      const rolePrefIndex = rolePreferredDays.indexOf(dNum);
+      if (rolePrefIndex !== -1 && status !== 'SKIPPED') {
+        score += Math.max(5, 30 - rolePrefIndex * 4);
+      }
+
+      // Capstone project boost (Day 31)
+      if (dNum === 31 && status !== 'SKIPPED') {
+        score += 2; // Low boost for starting day so core topic is chosen first
+      }
+
+      classifiedTopics[dNum] = {
         dayNumber: dNum,
-        title: dayObj ? dayObj.title : `Day ${dNum}`,
-        focusArea,
-        isProbeTarget
+        title: curDay.title,
+        status,
+        attempts,
+        relevanceScore: score
       };
     });
 
-    // Experience-based initial difficulty
-    const initialDifficulty =
-      candidateExp >= 8
+    // 3. Build candidate topic pool (Active non-skipped days sorted by relevance score)
+    const scoredDaysList = Object.values(classifiedTopics)
+      .filter(t => t.status !== 'SKIPPED')
+      .sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+    // Pick top 6 days for primary target list
+    const selectedDays: number[] = [];
+    const selectedTopics: string[] = [];
+    const priorityAreas: string[] = [];
+    const targetDays: PlannedTopic[] = [];
+
+    for (const item of scoredDaysList) {
+      if (selectedDays.length < 6) {
+        selectedDays.push(item.dayNumber);
+        selectedTopics.push(`Day ${item.dayNumber}: ${item.title}`);
+
+        let focusArea = 'Core technical mastery & architectural trade-offs';
+        let isProbeTarget = false;
+
+        if (item.status === 'FAILED') {
+          focusArea = `Diagnostic probe on failed mission (${item.attempts} attempts)`;
+          isProbeTarget = true;
+          priorityAreas.push(`Day ${item.dayNumber} (${item.title}) - Probe Failed Mission`);
+        } else if (item.status === 'ATTEMPTED / NEEDS PROBING') {
+          focusArea = `Probing perseverance & resolution (${item.attempts} attempts)`;
+          isProbeTarget = true;
+          priorityAreas.push(`Day ${item.dayNumber} (${item.title}) - Probing ${item.attempts} Attempts`);
+        } else if (rolePreferredDays.includes(item.dayNumber)) {
+          focusArea = `Role-aligned assessment for ${jobRole}`;
+          priorityAreas.push(`Day ${item.dayNumber} (${item.title}) - ${jobRole} Priority`);
+        } else {
+          priorityAreas.push(`Day ${item.dayNumber} (${item.title}) - Completed Topic`);
+        }
+
+        targetDays.push({
+          dayNumber: item.dayNumber,
+          title: item.title,
+          focusArea,
+          isProbeTarget,
+          status: item.status
+        });
+      }
+    }
+
+    // Ensure minimum 4 days in candidate plan
+    if (selectedDays.length < 4) {
+      allCurriculumDays.forEach(curDay => {
+        if (!selectedDays.includes(curDay.day) && !skippedDays.includes(curDay.day)) {
+          if (selectedDays.length < 5) {
+            selectedDays.push(curDay.day);
+            selectedTopics.push(`Day ${curDay.day}: ${curDay.title}`);
+            targetDays.push({
+              dayNumber: curDay.day,
+              title: curDay.title,
+              focusArea: 'General curriculum assessment',
+              isProbeTarget: false,
+              status: 'NOT COVERED'
+            });
+          }
+        }
+      });
+    }
+
+    // 4. Determine Candidate Continuation Starting Topic
+    // Pick the top non-capstone topic aligned with candidate's role / probe needs
+    const nonCapstoneTarget = selectedDays.find(d => d !== 31);
+    const startingDay = nonCapstoneTarget || selectedDays[0] || 7;
+
+    // 5. Determine Experience-Aware Difficulty
+    const difficulty: 'Foundational' | 'Intermediate' | 'Advanced' =
+      yearsExperience >= 8
         ? 'Advanced'
-        : candidateExp >= 3
+        : yearsExperience >= 3
         ? 'Intermediate'
         : 'Foundational';
 
+    const candidateTopicPool = scoredDaysList.map(t => t.dayNumber);
+
     return {
+      candidateId,
+      candidateName,
+      jobRole,
+      yearsExperience,
+      selectedDays,
+      selectedTopics,
+      priorityAreas,
       startingDay,
+      difficulty,
+      minimumQuestions: 8,
+      minimumDays: 4,
       targetDays,
-      totalQuestions: 8,
-      initialDifficulty,
-      candidateTopicPool: availablePool,
-      skippedDays
+      candidateTopicPool,
+      skippedDays,
+      classifiedTopics
     };
   }
 
-  private getRolePreferredDays(role: string): number[] {
-    if (role.includes('data engineer') || role.includes('data scientist')) {
-      return [10, 7, 8, 9, 23, 28, 29, 31];
+  private getRolePreferredDays(lowerRole: string): number[] {
+    if (lowerRole.includes('data engineer') || lowerRole.includes('data scientist') || lowerRole.includes('analytics')) {
+      return [10, 7, 8, 11, 23, 28, 29, 31];
     }
-    if (role.includes('devops') || role.includes('infrastructure') || role.includes('support')) {
-      return [28, 29, 1, 2, 23, 27, 30, 31];
+    if (lowerRole.includes('devops') || lowerRole.includes('infrastructure') || lowerRole.includes('sre') || lowerRole.includes('sysadmin')) {
+      return [28, 29, 23, 1, 2, 27, 30, 31];
     }
-    if (role.includes('ai engineer') || role.includes('ml engineer')) {
-      return [22, 23, 10, 7, 8, 13, 21, 31];
+    if (lowerRole.includes('ai engineer') || lowerRole.includes('ml engineer') || lowerRole.includes('machine learning')) {
+      return [22, 23, 10, 7, 11, 13, 21, 31];
     }
-    if (role.includes('backend') || role.includes('software engineer') || role.includes('architect')) {
-      return [16, 22, 10, 13, 23, 28, 31];
+    if (lowerRole.includes('backend') || lowerRole.includes('software engineer') || lowerRole.includes('architect') || lowerRole.includes('developer')) {
+      return [16, 22, 13, 23, 18, 10, 28, 31];
     }
-    if (role.includes('ux') || role.includes('frontend') || role.includes('product') || role.includes('marketing') || role.includes('hr') || role.includes('analyst')) {
-      return [3, 2, 1, 12, 16, 17, 19, 20, 31];
+    if (lowerRole.includes('ux') || lowerRole.includes('frontend') || lowerRole.includes('mobile')) {
+      return [3, 17, 18, 16, 12, 1, 2, 31];
     }
-    // Default fallback
-    return [7, 10, 12, 22, 28, 31];
+    if (lowerRole.includes('business analyst') || lowerRole.includes('product') || lowerRole.includes('marketing') || lowerRole.includes('hr') || lowerRole.includes('manager')) {
+      return [12, 16, 20, 1, 2, 3, 31];
+    }
+    return [10, 16, 22, 12, 7, 28, 31];
   }
 }
 
