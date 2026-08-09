@@ -743,37 +743,37 @@ This project was developed using an AI-assisted / vibe-coding workflow. Multiple
 
 Tools Used
 
-1. ChatGPT
+#### 1. ChatGPT
 
 Used for:
 
-Understanding and breaking down the problem statement.
+- Understanding and breaking down the problem statement.
 
-Designing the overall system architecture.
+- Designing the overall system architecture.
 
-Planning frontend and backend folder structures.
+- Planning frontend and backend folder structures.
 
-Reasoning about candidate personalization.
+- Reasoning about candidate personalization.
 
-Designing the adaptive interview flow.
+- Designing the adaptive interview flow.
 
-Designing interview-report generation.
+- Designing interview-report generation.
 
-Creating implementation prompts for other AI coding tools.
+- Creating implementation prompts for other AI coding tools.
 
-Debugging and troubleshooting development issues.
+- Debugging and troubleshooting development issues.
 
-Reviewing architectural decisions.
+- Reviewing architectural decisions.
 
-Git/GitHub workflow guidance.
+- Git/GitHub workflow guidance.
 
-README and project documentation generation.
+- README and project documentation generation.
 
-Prompt engineering and refinement.
+- Prompt engineering and refinement.
 
 ChatGPT was primarily used as an architecture, reasoning, prompt-engineering, debugging, and development assistant.
 
-2. Google Stitch
+#### 2. Google Stitch
 
 Used for:
 
@@ -791,7 +791,7 @@ Iterating on the UI and UX.
 
 The Stitch-generated frontend was treated as the primary visual reference for the application.
 
-3. Google AI Studio
+#### 3. Google AI Studio
 
 Used for:
 
@@ -811,7 +811,7 @@ Local development setup and environment configuration.
 
 Google AI Studio was used as an important part of the AI-assisted implementation workflow.
 
-4. Antigravity
+### 4. Antigravity
 
 Used for:
 
@@ -835,7 +835,7 @@ Maintaining the existing frontend architecture while extending functionality.
 
 Antigravity was used as the primary AI coding and implementation assistant during later development iterations.
 
-5. Google Gemini
+#### 5. Google Gemini
 
 Used as the underlying generative AI capability for:
 
@@ -855,7 +855,7 @@ Final interview feedback generation.
 
 Gemini powers the conversational intelligence of the AI interviewer.
 
-6. VS Code
+#### 6. VS Code
 
 Used for:
 
@@ -875,7 +875,7 @@ Git/GitHub integration.
 
 Testing frontend and backend behavior.
 
-7. Git & GitHub
+#### 7. Git & GitHub
 
 Used for:
 
@@ -893,7 +893,7 @@ Team-based development.
 
 API keys and secrets are excluded from version control using .gitignore.
 
-8. Node.js / npm
+#### 8. Node.js / npm
 
 Used for:
 
@@ -905,7 +905,7 @@ Running the development environment.
 
 Building and serving the application.
 
-9. React + Vite
+#### 9. React + Vite
 
 Used for:
 
@@ -923,7 +923,7 @@ Interview progress.
 
 Interview report.
 
-10. Express.js
+#### 10. Express.js
 
 Used for:
 
