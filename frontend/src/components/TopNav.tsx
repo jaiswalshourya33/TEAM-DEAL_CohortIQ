@@ -132,24 +132,25 @@ export const TopNav: React.FC<TopNavProps> = ({
   const isLight = theme === 'light';
 
   return (
-    <header className={`backdrop-blur-md border-b sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 py-3 transition-colors duration-200 ${
+    <header className={`backdrop-blur-md border-b sticky top-0 z-50 w-full px-3 sm:px-6 py-2.5 transition-colors duration-200 ${
       isLight 
         ? 'bg-white/90 border-slate-200/80 text-slate-900 shadow-sm' 
         : 'bg-[#161310]/95 border-[#383430] text-[#e9e1dc]'
     }`}>
-      <div className="flex items-center justify-between max-w-7xl mx-auto gap-4 sm:gap-6">
+      <div className="flex items-center justify-between max-w-7xl mx-auto gap-2 sm:gap-4">
         {/* Left Section: Brand & Segmented Nav */}
-        <div className="flex items-center gap-6 sm:gap-8 lg:gap-10">
+        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <CohortIQLogo
             theme={theme}
             size="md"
-            showBadge={true}
+            showBadge={false}
             showSubtitle={false}
             onClick={onGoToWelcome ? onGoToWelcome : () => setActiveTab('dashboard')}
+            className="shrink-0"
           />
 
           {/* Segmented Tab Navigation Bar */}
-          <nav className={`hidden md:flex items-center gap-1.5 p-1.5 rounded-xl border transition-colors ${
+          <nav className={`hidden md:flex items-center gap-1 p-1 rounded-xl border transition-colors shrink-0 ${
             isLight
               ? 'bg-slate-100/80 border-slate-200'
               : 'bg-[#1c1815] border-[#383430]'
@@ -163,7 +164,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === tab.id
                     ? isLight
                       ? 'bg-white text-blue-600 shadow-sm border border-slate-200'
@@ -181,24 +182,24 @@ export const TopNav: React.FC<TopNavProps> = ({
         </div>
 
         {/* Right Section: Candidate Selector, Theme & Profile */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Candidate Switcher Pill */}
-          <div className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs transition-colors border ${
+          <div className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs transition-colors border ${
             isLight
               ? 'bg-slate-100/80 border-slate-200 hover:border-slate-300'
               : 'bg-[#1c1815] border-[#383430] hover:border-[#534439]'
           }`}>
             <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
-            <span className={`text-[11px] uppercase tracking-wider font-semibold hidden lg:inline ${
+            <span className={`text-[11px] uppercase tracking-wider font-semibold hidden xl:inline shrink-0 ${
               isLight ? 'text-slate-500' : 'text-[#a08d80]'
-            }`}>Active Candidate:</span>
+            }`}>Active:</span>
             <select
               value={selectedCandidate.member.id}
               onChange={(e) => {
                 const found = allCandidates.find(c => c.member.id === e.target.value);
                 if (found) onSelectCandidate(found);
               }}
-              className={`bg-transparent font-bold focus:outline-none cursor-pointer text-xs ${
+              className={`bg-transparent font-bold focus:outline-none cursor-pointer text-xs max-w-[130px] sm:max-w-[180px] truncate ${
                 isLight ? 'text-slate-900' : 'text-[#e9e1dc]'
               }`}
             >
@@ -215,7 +216,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             <button
               onClick={onToggleTheme}
               title={isLight ? 'Switch to Dark Theme' : 'Switch to Light Theme'}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs transition-all cursor-pointer border shadow-sm ${
+              className={`flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs transition-all cursor-pointer border shadow-sm shrink-0 ${
                 isLight
                   ? 'bg-white border-slate-200 text-slate-700 hover:text-blue-600 hover:border-slate-300'
                   : 'bg-[#1c1815] border-[#383430] text-[#e9e1dc] hover:border-[#ffc499]/50'
@@ -231,7 +232,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           )}
 
           {/* Icon Actions */}
-          <div className={`flex items-center gap-2.5 border-l pl-3 sm:pl-4 relative ${
+          <div className={`flex items-center gap-2 border-l pl-2 sm:pl-3 relative shrink-0 ${
             isLight ? 'border-slate-200' : 'border-[#383430]'
           }`}>
             {/* Notification Icon & Dropdown */}
