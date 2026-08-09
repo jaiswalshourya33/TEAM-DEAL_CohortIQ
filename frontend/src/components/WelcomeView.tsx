@@ -35,7 +35,7 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
               ? ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'] 
               : ['#ffc499', '#f4a261', '#e76f51']
             }
-            mouseForce={18}
+            mouseForce={10}
             cursorSize={120}
             isViscous={true}
             viscous={30}
@@ -44,8 +44,8 @@ export const WelcomeView: React.FC<WelcomeViewProps> = ({
             resolution={0.5}
             isBounce={false}
             autoDemo={true}
-            autoSpeed={0.5}
-            autoIntensity={2.2}
+            autoSpeed={1.1}
+            autoIntensity={2.8}
             takeoverDuration={0.25}
             autoResumeDelay={3000}
             autoRampDuration={0.6}
