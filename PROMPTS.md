@@ -1,9 +1,9 @@
-# Intervia — Prompt History
+# CohortIQ — Prompt History
 
 > Consolidated prompt history used while designing and building the AI Interview Agent website.
 >
 > **Team:** DEAL  
-> **Project:** Intervia — AI Technical Interview Agent
+> **Project:** CohortIQ — AI Technical Interview Agent
 
 ---
 
@@ -735,11 +735,320 @@ Personalized Interview Report
 
 ---
 
-## Notes
+## 14. Vibe Coding / AI-Assisted Development Tools Used
 
-- The curriculum and candidate profiles are synthetic challenge data.
-- The Technical Specification is authoritative for the API contract.
-- The existing Stitch frontend should remain visually intact.
-- Backend logic should be modified without unnecessarily changing the UI.
-- API keys must never be committed.
-- Personalization should be based on meaningful candidate data, not random topic selection.
+### Project Development Workflow
+
+This project was developed using an AI-assisted / vibe-coding workflow. Multiple AI and development tools were used throughout the ideation, design, implementation, debugging, documentation, and refinement stages.
+
+Tools Used
+
+1. ChatGPT
+
+Used for:
+
+Understanding and breaking down the problem statement.
+
+Designing the overall system architecture.
+
+Planning frontend and backend folder structures.
+
+Reasoning about candidate personalization.
+
+Designing the adaptive interview flow.
+
+Designing interview-report generation.
+
+Creating implementation prompts for other AI coding tools.
+
+Debugging and troubleshooting development issues.
+
+Reviewing architectural decisions.
+
+Git/GitHub workflow guidance.
+
+README and project documentation generation.
+
+Prompt engineering and refinement.
+
+ChatGPT was primarily used as an architecture, reasoning, prompt-engineering, debugging, and development assistant.
+
+2. Google Stitch
+
+Used for:
+
+Generating the initial frontend UI.
+
+Designing the application screens.
+
+Exploring the visual direction of the product.
+
+Creating the page layouts and component structure.
+
+Establishing the visual language for the interview experience.
+
+Iterating on the UI and UX.
+
+The Stitch-generated frontend was treated as the primary visual reference for the application.
+
+3. Google AI Studio
+
+Used for:
+
+AI-assisted application generation.
+
+Integrating the Gemini-powered interview functionality.
+
+Connecting the frontend and backend.
+
+Working with the supplied curriculum and candidate data.
+
+Implementing the interview-agent workflow.
+
+Generating and refining application logic.
+
+Local development setup and environment configuration.
+
+Google AI Studio was used as an important part of the AI-assisted implementation workflow.
+
+4. Antigravity
+
+Used for:
+
+AI-assisted coding and implementation.
+
+Refining the existing application rather than rebuilding it.
+
+Implementing candidate-specific interview orchestration.
+
+Improving adaptive question generation.
+
+Connecting candidate learning signals to interview planning.
+
+Implementing interview evaluation logic.
+
+Generating interview reports from actual interview performance.
+
+Debugging and modifying the existing codebase.
+
+Maintaining the existing frontend architecture while extending functionality.
+
+Antigravity was used as the primary AI coding and implementation assistant during later development iterations.
+
+5. Google Gemini
+
+Used as the underlying generative AI capability for:
+
+Technical question generation.
+
+Candidate-aware question generation.
+
+Follow-up question generation.
+
+Answer evaluation.
+
+Adaptive interview progression.
+
+Technical reasoning assessment.
+
+Final interview feedback generation.
+
+Gemini powers the conversational intelligence of the AI interviewer.
+
+6. VS Code
+
+Used for:
+
+Local development.
+
+Code inspection.
+
+Debugging.
+
+Running the application.
+
+Managing the project structure.
+
+Environment-variable configuration.
+
+Git/GitHub integration.
+
+Testing frontend and backend behavior.
+
+7. Git & GitHub
+
+Used for:
+
+Version control.
+
+Branch management.
+
+Collaboration.
+
+Code review.
+
+Project backup and sharing.
+
+Team-based development.
+
+API keys and secrets are excluded from version control using .gitignore.
+
+8. Node.js / npm
+
+Used for:
+
+Backend runtime.
+
+Dependency management.
+
+Running the development environment.
+
+Building and serving the application.
+
+9. React + Vite
+
+Used for:
+
+Frontend application development.
+
+Component-based UI.
+
+Interview state management.
+
+Candidate profile presentation.
+
+Interview room.
+
+Interview progress.
+
+Interview report.
+
+10. Express.js
+
+Used for:
+
+Backend HTTP server.
+
+Interview API.
+
+Connecting the frontend with the AI interview agent.
+
+Maintaining interview sessions.
+
+Processing candidate responses.
+
+AI-Assisted / Vibe Coding Workflow
+
+The project followed an iterative AI-assisted development process:
+
+Problem Statement
+       ↓
+ChatGPT
+Architecture + Planning
+       ↓
+Google Stitch
+UI / UX Generation
+       ↓
+Google AI Studio
+Initial AI-Assisted Implementation
+       ↓
+VS Code
+Local Development + Testing
+       ↓
+Antigravity
+Code Refinement + Feature Implementation
+       ↓
+Google Gemini
+Interview Intelligence
+       ↓
+ChatGPT + Antigravity
+Debugging + Optimization
+       ↓
+Git / GitHub
+Version Control + Collaboration
+
+The development process was iterative rather than completely generated in one step.
+
+AI tools were used to accelerate:
+
+Ideation
+
+Architecture
+
+UI generation
+
+Coding
+
+Refactoring
+
+Debugging
+
+Prompt engineering
+
+Testing
+
+Documentation
+
+Human/team decisions were still used to determine the product requirements, architecture, feature priorities, UI direction, and final implementation.
+
+Prompt Engineering as Part of the Development
+
+Prompt engineering was an important part of the project.
+
+Different prompts were created for different responsibilities:
+
+Problem Understanding
+        ↓
+Architecture Prompt
+        ↓
+UI / Stitch Prompt
+        ↓
+Full-Stack Implementation Prompt
+        ↓
+Personalization Prompt
+        ↓
+Adaptive Interview Prompt
+        ↓
+Interview Evaluation Prompt
+        ↓
+Report Generation Prompt
+        ↓
+Documentation Prompt
+
+This allowed the AI tools to work with clear responsibilities instead of relying on one large generic instruction.
+
+Human + AI Development Model
+
+The project follows a human-in-the-loop vibe-coding workflow:
+
+Human Decision
+      ↓
+AI Generation
+      ↓
+Human Review
+      ↓
+Testing
+      ↓
+AI Refinement
+      ↓
+Human Validation
+      ↓
+Final Implementation
+
+AI tools were used as development accelerators and engineering assistants, while the team remained responsible for evaluating outputs, selecting the architecture, testing functionality, and deciding which changes should be incorporated.
+
+---
+
+### Notes
+
+The curriculum and candidate profiles are synthetic challenge data.
+
+The Technical Specification is authoritative for the API contract.
+
+The existing Stitch frontend should remain visually intact.
+
+Backend logic should be modified without unnecessarily changing the UI.
+
+API keys must never be committed.
+
+Personalization should be based on meaningful candidate data, not random topic selection.
