@@ -158,7 +158,7 @@ export default function LiquidEther({
       }
       update() {
         if (!this.clock) return;
-        this.delta = this.clock.getDelta();
+        this.delta = Math.min(Math.max(this.clock.getDelta(), 0.001), 0.033);
         this.time += this.delta;
       }
     }
@@ -287,10 +287,13 @@ export default function LiquidEther({
         this.isHoverInside = false;
       }
       update() {
+        const dtSec = Common.delta > 0 ? Math.min(Common.delta, 0.033) : 0.016;
+        const lerpFactor = 1 - Math.exp(-14 * dtSec);
+
         if (this.hasUserControl && !this.takeoverActive && !this.isAutoActive) {
-          this.coords.lerp(this.targetCoords, 0.2);
+          this.coords.lerp(this.targetCoords, lerpFactor);
         } else if (this.isAutoActive && !this.takeoverActive) {
-          this.coords.lerp(this.targetCoords, 0.25);
+          this.coords.lerp(this.targetCoords, lerpFactor * 1.1);
         }
         if (this.takeoverActive) {
           const t = (performance.now() - this.takeoverStartTime) / (this.takeoverDuration * 1000);
@@ -328,6 +331,9 @@ export default function LiquidEther({
       activationTime = 0;
       margin = 0.2;
       private _tmpDir = new THREE.Vector2();
+      private _vel = new THREE.Vector2();
+      private _phase = Math.random() * 100;
+
       constructor(
         mouse: MouseClass,
         manager: WebGLManager,
@@ -366,27 +372,44 @@ export default function LiquidEther({
           this.current.copy(this.mouse.coords);
           this.lastTime = now;
           this.activationTime = now;
+          this._vel.set(0, 0);
         }
         if (!this.active) return;
         this.mouse.isAutoActive = true;
         let dtSec = (now - this.lastTime) / 1000;
         this.lastTime = now;
-        if (dtSec > 0.2) dtSec = 0.016;
+        if (dtSec > 0.1 || dtSec <= 0) dtSec = 0.016;
+
+        this._phase += dtSec * 1.2;
+
         const dir = this._tmpDir.subVectors(this.target, this.current);
         const dist = dir.length();
-        if (dist < 0.01) {
+
+        if (dist < 0.2) {
           this.pickNewTarget();
-          return;
         }
+
         dir.normalize();
+
+        const waveX = Math.sin(this._phase * 1.4) * 0.25;
+        const waveY = Math.cos(this._phase * 0.95) * 0.25;
+        const desiredVel = dir.add(new THREE.Vector2(waveX, waveY)).normalize().multiplyScalar(this.speed);
+
+        const steerFactor = 1 - Math.exp(-5 * dtSec);
+        this._vel.lerp(desiredVel, steerFactor);
+
         let ramp = 1;
         if (this.rampDurationMs > 0) {
           const t = Math.min(1, (now - this.activationTime) / this.rampDurationMs);
           ramp = t * t * (3 - 2 * t);
         }
-        const step = this.speed * dtSec * ramp;
-        const move = Math.min(step, dist);
-        this.current.addScaledVector(dir, move);
+
+        this.current.addScaledVector(this._vel, dtSec * ramp);
+
+        const maxBound = 1 - this.margin;
+        this.current.x = Math.min(Math.max(this.current.x, -maxBound), maxBound);
+        this.current.y = Math.min(Math.max(this.current.y, -maxBound), maxBound);
+
         this.mouse.setNormalized(this.current.x, this.current.y);
       }
     }
