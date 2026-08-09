@@ -942,27 +942,35 @@ Used for:
 - The project followed an iterative AI-assisted development process:
 
 Problem Statement
+
        ↓
 ChatGPT
 Architecture + Planning
+
        ↓
 Google Stitch
 UI / UX Generation
+
        ↓
 Google AI Studio
 Initial AI-Assisted Implementation
+
        ↓
 VS Code
 Local Development + Testing
+
        ↓
 Antigravity
 Code Refinement + Feature Implementation
+
        ↓
 Google Gemini
 Interview Intelligence
+
        ↓
 ChatGPT + Antigravity
 Debugging + Optimization
+
        ↓
 Git / GitHub
 Version Control + Collaboration
@@ -971,67 +979,82 @@ The development process was iterative rather than completely generated in one st
 
 AI tools were used to accelerate:
 
-Ideation
+- Ideation
 
-Architecture
+- Architecture
 
-UI generation
+- UI generation
 
-Coding
+- Coding
 
-Refactoring
+- Refactoring
 
-Debugging
+- Debugging
 
-Prompt engineering
+- Prompt engineering
 
-Testing
+- Testing
 
-Documentation
+- Documentation
 
-Human/team decisions were still used to determine the product requirements, architecture, feature priorities, UI direction, and final implementation.
+Team decisions were still used to determine the product requirements, architecture, feature priorities, UI direction, and final implementation.
 
-Prompt Engineering as Part of the Development
+## Prompt Engineering as Part of the Development
 
 Prompt engineering was an important part of the project.
 
 Different prompts were created for different responsibilities:
 
 Problem Understanding
+
         ↓
 Architecture Prompt
+
         ↓
 UI / Stitch Prompt
+
         ↓
 Full-Stack Implementation Prompt
+
         ↓
 Personalization Prompt
+
         ↓
 Adaptive Interview Prompt
+
         ↓
 Interview Evaluation Prompt
+
         ↓
 Report Generation Prompt
+
         ↓
 Documentation Prompt
 
+
 This allowed the AI tools to work with clear responsibilities instead of relying on one large generic instruction.
 
-Human + AI Development Model
+## Human + AI Development Model
 
 The project follows a human-in-the-loop vibe-coding workflow:
 
 Human Decision
+
       ↓
 AI Generation
+
       ↓
 Human Review
+
       ↓
 Testing
+
       ↓
 AI Refinement
+
       ↓
 Human Validation
+
       ↓
 Final Implementation
 
