@@ -34,7 +34,14 @@ export async function handleInterview(req: Request, res: Response) {
         questionNumber: 1,
         totalQuestions: session.maxQuestions,
         topic: opening.topic,
-        difficulty: opening.difficulty
+        difficulty: opening.difficulty,
+        interviewPlan: {
+          candidateId: plan.candidateId,
+          startingDay: plan.startingDay,
+          selectedDays: plan.selectedDays,
+          priorityAreas: plan.priorityAreas,
+          difficulty: plan.difficulty
+        }
       });
     }
 
@@ -51,31 +58,33 @@ export async function handleInterview(req: Request, res: Response) {
       session.questionCount += 1;
     }
 
-    // 3. Evaluate answer
-    const previousQuestion = session.history[session.history.length - 2]?.content || '';
+    // 3. Evaluate candidate answer
+    const previousQuestion = session.history.filter(h => h.role === 'assistant').slice(-1)[0]?.content || '';
     const currentTopicName = session.currentTopic;
     const currentDayNumber = session.currentDay;
 
-    let evalResult = { isStrong: true, needsFollowup: false, keyInsights: 'Good explanation.' };
+    let evalResult = { isStrong: true, needsFollowup: false, keyInsights: 'Good technical explanation.', technicalDepth: 'high' };
     if (message) {
       evalResult = await answerEvaluator.evaluateAnswer(previousQuestion, message, currentTopicName);
+      session.evaluations.push(evalResult);
     }
 
     // Count how many assistant messages were asked on current day
     const questionsAskedOnCurrentDay = session.history.filter(
-      h => h.role === 'assistant' && h.content.toLowerCase().includes(`day ${currentDayNumber}`)
+      h => h.role === 'assistant' && (h.content.toLowerCase().includes(`day ${currentDayNumber}`) || h.content === previousQuestion)
     ).length;
 
-    // 4. Select next target day
+    // 4. Select next target day dynamically
     let nextTargetDayNumber = currentDayNumber;
     const targetDays = session.plan?.targetDays || [];
     const candidatePool = session.plan?.candidateTopicPool || targetDays.map((t: any) => t.dayNumber);
 
-    // Rule A: If candidate needs follow-up / probing AND we haven't asked 2 questions on current day -> stay on current day
+    // Adaptive Decision Logic:
+    // Rule A: If candidate needs follow-up / probing AND we haven't asked 2 questions on current day -> stay on current day to probe deeper
     if (evalResult.needsFollowup && questionsAskedOnCurrentDay < 2) {
       nextTargetDayNumber = currentDayNumber;
     } else {
-      // Rule B: Candidate answered well or reached limit on current topic -> transition to next uncovered planned target day
+      // Rule B: Candidate answered well or reached 2 question limit on current topic -> transition to next uncovered target day
       const uncoveredPlanTopic = targetDays.find((t: any) => !session.coveredDays.has(t.dayNumber));
 
       if (uncoveredPlanTopic) {
@@ -86,15 +95,15 @@ export async function handleInterview(req: Request, res: Response) {
         if (uncoveredPoolDay) {
           nextTargetDayNumber = uncoveredPoolDay;
         } else {
-          // If all days covered, rotate to another planned day
+          // If all pool days covered, cycle to another planned day
           const nextIndex = (session.coveredDays.size) % Math.max(1, targetDays.length);
           nextTargetDayNumber = targetDays[nextIndex]?.dayNumber || currentDayNumber;
         }
       }
     }
 
-    // Rule C: Ensure 4+ covered days requirement by question 7 & 8
-    if (session.questionCount >= 7 && session.coveredDays.size < 4) {
+    // Rule C: Force Minimum 4 Covered Days requirement before question 8
+    if (session.questionCount >= 6 && session.coveredDays.size < 4) {
       const remainingUncovered = targetDays.find((t: any) => !session.coveredDays.has(t.dayNumber));
       if (remainingUncovered) {
         nextTargetDayNumber = remainingUncovered.dayNumber;
@@ -106,8 +115,9 @@ export async function handleInterview(req: Request, res: Response) {
 
     sessionService.markDayCovered(sessionId, nextTargetDayNumber, nextTopicTitle);
 
-    // 5. Check Completion (questionCount > maxQuestions AND coveredDays >= 4)
-    if (session.questionCount > session.maxQuestions && session.coveredDays.size >= 4) {
+    // 5. Check Minimum Requirements & Interview Completion
+    // Requirement: questionCount >= 8 AND unique coveredDays >= 4
+    if (session.questionCount > session.maxQuestions && session.coveredDays.size >= (session.plan?.minimumDays || 4)) {
       session.done = true;
       const feedback = await feedbackGenerator.generateFeedback(
         session.candidate,
@@ -118,20 +128,21 @@ export async function handleInterview(req: Request, res: Response) {
       sessionService.updateSession(session);
 
       return res.json({
-        reply: 'Interview completed.',
+        reply: 'Interview completed. Excellent work demonstrating your technical expertise.',
         done: true,
         feedback
       });
     }
 
-    // 6. Generate next question
+    // 6. Generate next adaptive question
     const nextQuestion = await followupGenerator.generateNextQuestion(
       session.candidate,
       nextTargetDayNumber,
       session.questionCount,
       session.maxQuestions,
       session.history,
-      evalResult.keyInsights
+      evalResult.keyInsights,
+      session.askedQuestions
     );
 
     sessionService.addMessage(sessionId, 'assistant', nextQuestion.reply);

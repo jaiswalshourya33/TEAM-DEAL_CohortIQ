@@ -19,8 +19,15 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [questionNum, setQuestionNum] = useState(1);
   const [totalQuestions, setTotalQuestions] = useState(6);
-  const [currentTopic, setCurrentTopic] = useState('Day 1-7: Embeddings & Vector Search');
-  const [difficulty, setDifficulty] = useState('Advanced');
+  const getCandidateInitialTopic = (cand: CandidateProfile) => {
+    const nonSkipped = cand.missions?.filter(m => !m.skipped) || [];
+    const startingMission = nonSkipped[0] || cand.missions?.[0];
+    return startingMission ? `Day ${startingMission.day}: ${startingMission.title}` : 'Technical Assessment';
+  };
+
+  const [currentTopic, setCurrentTopic] = useState<string>(() => getCandidateInitialTopic(candidate));
+  const [difficulty, setDifficulty] = useState<string>('Intermediate');
+  const [planNodes, setPlanNodes] = useState<Array<{ dayNumber: number; title: string }>>([]);
   const [isCodeMode, setIsCodeMode] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
@@ -81,30 +88,35 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
 
         const data = await res.json();
         if (isMounted) {
+          const startingTopic = data.topic || getCandidateInitialTopic(candidate);
           const firstAiMsg: InterviewMessage = {
             id: '1',
             sender: 'ai',
-            text: data.reply || `Welcome ${candidate.member.name}. Let's begin the technical interview starting with foundational cohort concepts.\n\nTo start: When generating vector embeddings for large text corpora, how do you evaluate the trade-offs between dense embeddings (e.g., text-embedding-3) vs sparse representations (e.g., BM25 or SPLADE)?`,
+            text: data.reply || `Welcome ${candidate.member.name}. Let's begin your personalized technical interview tailored to your AI Cohort journey.\n\nTo start with ${startingTopic}: How do you approach key technical design choices and trade-offs in this module?`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             questionNumber: data.questionNumber || 1,
-            topic: data.topic || 'Day 1-7: Embeddings & Vector Search',
-            difficulty: data.difficulty || 'Advanced'
+            topic: startingTopic,
+            difficulty: data.difficulty || 'Intermediate'
           };
           setMessages([firstAiMsg]);
           if (data.questionNumber) setQuestionNum(data.questionNumber);
           if (data.totalQuestions) setTotalQuestions(data.totalQuestions);
           if (data.topic) setCurrentTopic(data.topic);
+          if (data.difficulty) setDifficulty(data.difficulty);
+          if (data.interviewPlan?.targetDays) setPlanNodes(data.interviewPlan.targetDays);
         }
       } catch (err) {
         console.error('Error starting interview session:', err);
         if (isMounted) {
+          const startingTopic = getCandidateInitialTopic(candidate);
           setMessages([
             {
               id: '1',
               sender: 'ai',
-              text: `Welcome ${candidate.member.name}. Let's begin the technical interview starting with foundational cohort concepts.\n\nTo start: When generating vector embeddings for large text corpora, how do you evaluate the trade-offs between dense embeddings (e.g., text-embedding-3) vs sparse representations (e.g., BM25 or SPLADE)?`,
+              text: `Welcome ${candidate.member.name}. Let's begin your personalized technical interview tailored to your AI Cohort journey.\n\nTo start with ${startingTopic}: How do you approach key technical design choices and trade-offs in this module?`,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              questionNumber: 1
+              questionNumber: 1,
+              topic: startingTopic
             }
           ]);
         }
@@ -290,46 +302,57 @@ export const InterviewRoomView: React.FC<InterviewRoomViewProps> = ({
             </div>
 
             <div className="space-y-2 text-xs">
-              {[
-                { step: 1, label: 'Day 1-7: Embeddings & Vector Search' },
-                { step: 2, label: 'Day 8-10: RAG Systems & Chunking' },
-                { step: 3, label: 'Day 12-13: Function Calling & JSON' },
-                { step: 4, label: 'Day 14-15: Fine-Tuning & LoRA' },
-                { step: 5, label: 'Day 21-23: Agentic Workflows & MCP' },
-                { step: 6, label: 'Day 28-29: Observability & Deploy' }
-              ].map((node) => {
-                const isVerified = questionNum > node.step;
-                const isActive = questionNum === node.step;
+              {(() => {
+                const activeNodes = planNodes.length > 0
+                  ? planNodes.slice(0, 6).map((t, idx) => ({
+                      step: idx + 1,
+                      dayNumber: t.dayNumber,
+                      label: `Day ${t.dayNumber}: ${t.title}`
+                    }))
+                  : (candidate.missions?.filter(m => !m.skipped) || []).slice(0, 6).map((m, idx) => ({
+                      step: idx + 1,
+                      dayNumber: m.day,
+                      label: `Day ${m.day}: ${m.title}`
+                    }));
 
-                return (
-                  <div
-                    key={node.step}
-                    className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
-                      isActive
-                        ? 'bg-[#2b2723] border border-[#ffc499]/50 text-[#ffc499]'
-                        : isVerified
-                        ? 'bg-[#221f1c] text-emerald-400'
-                        : 'bg-[#221f1c] text-[#a08d80]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      {isVerified && (
-                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                      )}
-                      {isActive && (
-                        <span className="w-2 h-2 rounded-full bg-[#f4a261] animate-ping shrink-0"></span>
-                      )}
-                      {!isVerified && !isActive && (
-                        <span className="material-symbols-outlined text-sm">radio_button_unchecked</span>
-                      )}
-                      <span className={`truncate ${isActive ? 'font-bold' : ''}`}>{node.label}</span>
+                const currentDayMatch = currentTopic.match(/Day (\d+)/i);
+                const activeDayNum = currentDayMatch ? parseInt(currentDayMatch[1], 10) : 0;
+                const activeNodeIndex = activeNodes.findIndex(n => n.dayNumber === activeDayNum);
+
+                return activeNodes.map((node, idx) => {
+                  const isActive = activeNodeIndex !== -1 ? idx === activeNodeIndex : questionNum === node.step;
+                  const isVerified = activeNodeIndex !== -1 ? idx < activeNodeIndex : questionNum > node.step;
+
+                  return (
+                    <div
+                      key={node.step}
+                      className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-[#2b2723] border border-[#ffc499]/50 text-[#ffc499]'
+                          : isVerified
+                          ? 'bg-[#221f1c] text-emerald-400'
+                          : 'bg-[#221f1c] text-[#a08d80]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        {isVerified && (
+                          <span className="material-symbols-outlined text-sm">check_circle</span>
+                        )}
+                        {isActive && (
+                          <span className="w-2 h-2 rounded-full bg-[#f4a261] animate-ping shrink-0"></span>
+                        )}
+                        {!isVerified && !isActive && (
+                          <span className="material-symbols-outlined text-sm">radio_button_unchecked</span>
+                        )}
+                        <span className={`truncate ${isActive ? 'font-bold' : ''}`}>{node.label}</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold shrink-0 ml-1">
+                        {isVerified ? 'Verified' : isActive ? 'ACTIVE' : 'Queued'}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-mono font-bold shrink-0 ml-1">
-                      {isVerified ? 'Verified' : isActive ? 'ACTIVE' : 'Queued'}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>

@@ -37,10 +37,11 @@ export class FeedbackGenerator {
     conversationHistory: MessageItem[],
     coveredTopics: string[]
   ): Promise<FeedbackOutput> {
-    const candidateName = candidate.member.name;
-    const candidateRole = candidate.member.jobRole;
-    const candidateExp = candidate.member.yearsExperience;
+    const candidateName = candidate.member.name || 'Candidate';
+    const candidateRole = candidate.member.jobRole || 'Engineer';
+    const candidateExp = candidate.member.yearsExperience || 0;
     const skippedMissions = candidate.missions ? candidate.missions.filter(m => m.skipped) : [];
+    const skippedDaysList = skippedMissions.map(m => `Revisit Day ${m.day}: ${m.title}`);
 
     const ai = getGenAI();
     if (ai) {
@@ -54,13 +55,18 @@ export class FeedbackGenerator {
 CANDIDATE PROFILE:
 Name: ${candidateName}
 Role: ${candidateRole} (${candidateExp} yrs experience)
-Covered Topics: ${coveredTopics.join(', ')}
-Skipped Modules in Journey: ${skippedMissions.map(m => `Day ${m.day}: ${m.title}`).join('; ') || 'None'}
+Covered Topics in Interview: ${coveredTopics.join(', ')}
+Skipped Modules in Learning Journey: ${skippedMissions.map(m => `Day ${m.day}: ${m.title}`).join('; ') || 'None'}
 
 INTERVIEW TRANSCRIPT:
 ${transcriptText}
 
-Generate the final JSON feedback strictly matching the requested schema. Ensure skipped modules are mentioned in recommended next steps if relevant.`;
+INSTRUCTIONS:
+1. Return JSON matching the requested schema.
+2. Ensure strengths reference specific technical concepts candidate demonstrated well.
+3. Ensure gaps reference specific technical concepts where candidate needed probing or struggled.
+4. Ensure 'next' steps directly link recommendations to specific 31-day curriculum days (e.g. "Revisit Day 10 — Retrieval & Matching Engine").
+5. Include any skipped curriculum days in the 'next' recommendations.`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -72,27 +78,35 @@ Generate the final JSON feedback strictly matching the requested schema. Ensure 
 
         if (response.text) {
           const parsed = JSON.parse(response.text.trim());
+          const nextRecs = Array.isArray(parsed.next) ? parsed.next : [];
+          skippedDaysList.forEach(s => {
+            if (!nextRecs.some((r: string) => r.includes(s.substring(0, 10)))) {
+              nextRecs.push(s);
+            }
+          });
+
           return {
-            summary: parsed.summary || `${candidateName} (${candidateRole}) demonstrated solid technical comprehension across the cohort curriculum.`,
-            strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [
-              `Solid domain alignment for ${candidateRole}.`,
-              "Articulated core AI principles clearly.",
-              "Demonstrated structured technical problem solving."
+            summary: parsed.summary || `${candidateName} (${candidateRole}) completed a candidate-aware adaptive technical interview covering key cohort topics.`,
+            strengths: Array.isArray(parsed.strengths) && parsed.strengths.length > 0 ? parsed.strengths : [
+              `Demonstrated solid domain alignment for ${candidateRole}.`,
+              "Articulated core AI architecture principles clearly.",
+              "Showed structured technical reasoning across covered topics."
             ],
-            gaps: Array.isArray(parsed.gaps) ? parsed.gaps : [
-              "Could provide deeper quantitative SLAs for production latency.",
-              "Further elaboration on automated retrieval evaluation."
+            gaps: Array.isArray(parsed.gaps) && parsed.gaps.length > 0 ? parsed.gaps : [
+              "Could provide deeper quantitative metrics for production latency and cost.",
+              "Elaborate further on automated retrieval evaluation benchmarks."
             ],
-            next: Array.isArray(parsed.next) ? parsed.next : [
-              ...skippedMissions.map(m => `Review Day ${m.day}: ${m.title}`),
-              "Practice End-to-End Latency & Cost Optimization Workshops"
+            next: nextRecs.length > 0 ? nextRecs : [
+              ...skippedDaysList,
+              "Revisit Day 10 — Retrieval & Matching Engine",
+              "Revisit Day 23 — Model Context Protocol (MCP) Integration"
             ],
             scores: parsed.scores || {
               overall: Math.min(96, 76 + Math.min(candidateExp, 12)),
-              technicalUnderstanding: 84,
-              depthOfReasoning: 80,
-              systemDesign: 78,
-              practicalApplication: 82,
+              technicalUnderstanding: 85,
+              depthOfReasoning: 82,
+              systemDesign: 80,
+              practicalApplication: 84,
               communication: 86
             }
           };
@@ -102,33 +116,39 @@ Generate the final JSON feedback strictly matching the requested schema. Ensure 
       }
     }
 
-    // Default fallback feedback incorporating skipped missions
-    const recommendedNext = skippedMissions.map(m => `Review Day ${m.day}: ${m.title}`);
-    if (recommendedNext.length === 0) {
-      recommendedNext.push(
-        "Curriculum Day 10: RAG Reranking & Hybrid Search Techniques",
-        "Curriculum Day 23: Model Context Protocol (MCP) Standardized Tool Integration"
+    // High quality candidate-personalized fallback report
+    const nextRecs = [...skippedDaysList];
+    if (coveredTopics.some(t => t.toLowerCase().includes('retrieval') || t.toLowerCase().includes('day 10'))) {
+      nextRecs.push("Revisit Day 10 — Retrieval & Matching Engine (Automated Cross-Encoder Benchmarks)");
+    }
+    if (coveredTopics.some(t => t.toLowerCase().includes('mcp') || t.toLowerCase().includes('day 23'))) {
+      nextRecs.push("Revisit Day 23 — Model Context Protocol (MCP) Authorization & Rate Limiting");
+    }
+    if (nextRecs.length === 0) {
+      nextRecs.push(
+        "Revisit Day 10 — Retrieval & Matching Engine",
+        "Revisit Day 28 — Docker & Kubernetes Deployment"
       );
     }
 
     return {
-      summary: `${candidateName} (${candidateRole}, ${candidateExp} yrs exp) completed an extensive technical interview covering multiple cohort modules including ${coveredTopics.slice(0, 3).join(', ')}.`,
+      summary: `${candidateName} (${candidateRole}, ${candidateExp} yrs experience) completed a candidate-aware adaptive technical interview. The session covered ${coveredTopics.length} distinct curriculum topics including ${coveredTopics.slice(0, 3).join(', ')}.`,
       strengths: [
-        `Strong role-aligned understanding of AI concepts as a ${candidateRole}.`,
-        "Clear communication and structured technical reasoning.",
-        "Demonstrated practical familiarity with core cohort topics."
+        `Strong role-aligned understanding of AI application architecture as a ${candidateRole}.`,
+        "Structured technical problem-solving and clear communication.",
+        "Demonstrated practical familiarity with core cohort curriculum concepts."
       ],
       gaps: [
-        "Opportunity to deepen edge-case mitigation under high concurrent load.",
-        "Could elaborate further on automated RAG retrieval benchmarks."
+        "Opportunity to deepen edge-case mitigation under high concurrent user load.",
+        "Could elaborate further on automated RAG retrieval benchmarks and SLA monitoring."
       ],
-      next: recommendedNext,
+      next: nextRecs,
       scores: {
         overall: Math.min(95, 78 + Math.min(candidateExp, 10)),
-        technicalUnderstanding: 84,
-        depthOfReasoning: 80,
-        systemDesign: 78,
-        practicalApplication: 82,
+        technicalUnderstanding: 85,
+        depthOfReasoning: 82,
+        systemDesign: 80,
+        practicalApplication: 84,
         communication: 86
       }
     };

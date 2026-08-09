@@ -1,4 +1,5 @@
 import { CandidateProfile } from './candidate.service';
+import { InterviewPlan } from '../agent/interviewPlanner';
 
 export interface MessageItem {
   role: 'user' | 'assistant';
@@ -16,31 +17,35 @@ export interface InterviewSession {
   currentDay: number;
   difficulty: string;
   history: MessageItem[];
+  askedQuestions: string[];
+  evaluations: any[];
   done: boolean;
   feedback?: any;
-  plan?: any;
+  plan: InterviewPlan;
 }
 
 export class SessionService {
   private sessions = new Map<string, InterviewSession>();
 
-  createSession(sessionId: string, candidate: CandidateProfile, plan?: any): InterviewSession {
-    const firstTarget = plan?.targetDays?.[0];
-    const startDay = firstTarget?.dayNumber || (candidate.missions?.[0]?.day || 1);
-    const startTopicTitle = firstTarget?.title || `Day ${startDay}`;
+  createSession(sessionId: string, candidate: CandidateProfile, plan: InterviewPlan): InterviewSession {
+    const startDay = plan.startingDay || 7;
+    const startTopicObj = plan.targetDays.find(t => t.dayNumber === startDay) || plan.targetDays[0];
+    const startTopicTitle = startTopicObj ? startTopicObj.title : `Day ${startDay}`;
     const startTopic = startTopicTitle.startsWith('Day ') ? startTopicTitle : `Day ${startDay}: ${startTopicTitle}`;
 
     const session: InterviewSession = {
       sessionId,
       candidate,
       questionCount: 1,
-      maxQuestions: 8,
+      maxQuestions: plan.minimumQuestions || 8,
       coveredDays: new Set<number>([startDay]),
       coveredTopics: [startTopic],
       currentTopic: startTopic,
       currentDay: startDay,
-      difficulty: candidate.member.yearsExperience >= 8 ? 'Advanced' : 'Intermediate',
+      difficulty: plan.difficulty || 'Intermediate',
       history: [],
+      askedQuestions: [],
+      evaluations: [],
       done: false,
       plan
     };
@@ -60,6 +65,9 @@ export class SessionService {
     const session = this.getSession(sessionId);
     if (!session) return undefined;
     session.history.push({ role, content });
+    if (role === 'assistant') {
+      session.askedQuestions.push(content);
+    }
     this.updateSession(session);
     return session;
   }
@@ -77,7 +85,9 @@ export class SessionService {
   }
 
   isInterviewComplete(session: InterviewSession): boolean {
-    return session.questionCount >= session.maxQuestions && session.coveredDays.size >= 4;
+    const minQ = session.plan?.minimumQuestions || 8;
+    const minDays = session.plan?.minimumDays || 4;
+    return session.questionCount >= minQ && session.coveredDays.size >= minDays;
   }
 }
 
