@@ -12,9 +12,8 @@ The AI interviewer dynamically adapts its questions based on the candidate's pre
 
 ## 🚀 Live Demo
 
-### 🌐 [Try CohortIQ Live] 
+### 🌐 [team-deal-cohort-iq.vercel.app] 
 
-team-deal-cohort-iq.vercel.app
 ---
 
 # 🎯 Problem Statement
